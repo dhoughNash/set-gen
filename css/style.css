@@ -1,0 +1,157 @@
+:root{
+  --paper:#F6EEDD;
+  --paper-deep:#EFE3C8;
+  --ink:#1A140C;
+  --red:#A8231B;
+  --khaki:#8A7A55;
+  --line:#C9B98F;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  background:var(--paper);
+  color:var(--ink);
+  font-family:'Libre Franklin',sans-serif;
+  font-size:15px;
+  line-height:1.5;
+}
+
+/* ============ HEADER ============ */
+header{
+  border-bottom:6px double var(--ink);
+  padding:26px 28px 18px;
+  display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:8px;
+}
+header h1{
+  font-family:'Alfa Slab One',serif;
+  font-size:clamp(26px,4vw,42px);
+  letter-spacing:.5px;
+  text-transform:uppercase;
+  line-height:1;
+}
+header h1 span{color:var(--red)}
+.tagline{
+  font-family:'Oswald',sans-serif;text-transform:uppercase;letter-spacing:3px;font-size:12px;color:var(--khaki);
+}
+
+/* ============ LAYOUT ============ */
+main{display:grid;grid-template-columns:minmax(340px,460px) 1fr;gap:0;min-height:calc(100vh - 100px)}
+@media(max-width:900px){main{grid-template-columns:1fr}}
+.col-left{border-right:2px solid var(--ink);padding:22px 24px 60px;background:var(--paper)}
+.col-right{padding:22px 28px 60px;background:var(--paper-deep)}
+h2{
+  font-family:'Oswald',sans-serif;text-transform:uppercase;letter-spacing:2.5px;font-size:14px;font-weight:600;
+  border-bottom:2px solid var(--ink);padding-bottom:6px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:baseline;
+}
+h2 .count{color:var(--khaki);letter-spacing:1px}
+
+/* ============ FORMS ============ */
+label{
+  display:block;font-family:'Oswald',sans-serif;text-transform:uppercase;letter-spacing:1.5px;font-size:11px;font-weight:500;color:var(--khaki);margin:10px 0 3px;
+}
+input[type=text],input[type=number],select{
+  width:100%;padding:8px 10px;border:1.5px solid var(--ink);background:#FCF7EA;
+  font-family:'Libre Franklin',sans-serif;font-size:14px;color:var(--ink);border-radius:0;
+}
+input:focus,select:focus{outline:3px solid var(--red);outline-offset:-1px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.seg{display:flex;border:1.5px solid var(--ink);margin-top:2px}
+.seg button{
+  flex:1;padding:7px 4px;background:#FCF7EA;border:none;border-right:1.5px solid var(--ink);cursor:pointer;
+  font-family:'Oswald',sans-serif;text-transform:uppercase;letter-spacing:1px;font-size:12px;color:var(--ink);
+}
+.seg button:last-child{border-right:none}
+.seg button.on{background:var(--ink);color:var(--paper)}
+.seg button:focus-visible{outline:3px solid var(--red);outline-offset:-3px}
+.btn{
+  display:inline-block;padding:10px 18px;border:2px solid var(--ink);background:var(--ink);color:var(--paper);
+  font-family:'Oswald',sans-serif;text-transform:uppercase;letter-spacing:2px;font-size:13px;font-weight:600;cursor:pointer;border-radius:0;
+}
+.btn:hover{background:var(--red);border-color:var(--red)}
+.btn:focus-visible{outline:3px solid var(--red);outline-offset:2px}
+.btn.ghost{background:transparent;color:var(--ink)}
+.btn.ghost:hover{background:var(--ink);color:var(--paper)}
+.btn.red{background:var(--red);border-color:var(--red)}
+.btn.red:hover{background:var(--ink);border-color:var(--ink)}
+.btn.small{padding:5px 10px;font-size:11px;letter-spacing:1.5px}
+.btn-row{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap}
+
+/* ============ SONG LIST ============ */
+.song-list{margin-top:26px}
+.song-item{
+  border:1.5px solid var(--ink);background:#FCF7EA;padding:8px 10px;margin-bottom:8px;
+  display:flex;align-items:center;gap:10px;
+}
+.song-item .t-title{font-weight:700;font-size:14px;flex:1;min-width:0}
+.song-item .t-title small{display:block;font-weight:400;font-size:11px;color:var(--khaki);font-family:'Oswald',sans-serif;text-transform:uppercase;letter-spacing:1px}
+.badge{
+  font-family:'Oswald',sans-serif;font-size:11px;letter-spacing:1px;text-transform:uppercase;
+  padding:2px 7px;border:1.5px solid var(--ink);white-space:nowrap;
+}
+.badge.up{background:var(--ink);color:var(--paper)}
+.badge.down{background:transparent}
+.badge.mid{background:var(--line)}
+.badge.cover{border-color:var(--red);color:var(--red)}
+.mini{
+  background:none;border:none;cursor:pointer;font-size:15px;padding:2px 5px;color:var(--khaki);
+}
+.mini:hover{color:var(--red)}
+.mini:focus-visible{outline:2px solid var(--red)}
+.empty-note{color:var(--khaki);font-style:italic;padding:14px 0}
+
+/* ============ GENERATOR ============ */
+.gen-panel{border:2px solid var(--ink);background:var(--paper);padding:18px;margin-bottom:26px}
+.check{display:flex;align-items:center;gap:8px;margin-top:10px;font-size:13px}
+.check input{width:16px;height:16px;accent-color:var(--red)}
+.check label{margin:0;display:inline;color:var(--ink);font-size:12px}
+
+/* ============ SETLIST CARD ============ */
+.setlist-card{
+  background:#FBF4E2;border:3px solid var(--ink);box-shadow:8px 8px 0 var(--ink);
+  padding:30px 34px 26px;position:relative;
+}
+.tape{
+  position:absolute;top:-14px;left:50%;transform:translateX(-50%) rotate(-2deg);
+  width:130px;height:28px;background:rgba(200,180,120,.55);border:1px solid rgba(0,0,0,.08);
+}
+.sl-head{text-align:center;border-bottom:3px solid var(--ink);padding-bottom:12px;margin-bottom:6px}
+.sl-head .show{font-family:'Alfa Slab One',serif;font-size:26px;text-transform:uppercase;line-height:1.1}
+.sl-head .sub{font-family:'Oswald',sans-serif;text-transform:uppercase;letter-spacing:3px;font-size:12px;color:var(--khaki);margin-top:4px}
+.sl-row{
+  display:flex;align-items:baseline;gap:12px;padding:9px 0;border-bottom:1.5px dashed var(--line);
+}
+.sl-row .num{font-family:'Alfa Slab One',serif;font-size:18px;color:var(--red);width:30px;flex-shrink:0}
+.sl-row .name{font-family:'Alfa Slab One',serif;font-size:21px;text-transform:uppercase;letter-spacing:.5px;flex:1;line-height:1.15;min-width:0}
+.sl-row .name .intro-flag{font-family:'Oswald',sans-serif;font-size:11px;letter-spacing:1px;color:var(--red);display:block;text-transform:uppercase}
+.sl-row .meta{font-family:'Oswald',sans-serif;font-size:12px;letter-spacing:1px;color:var(--khaki);text-transform:uppercase;white-space:nowrap}
+.sl-row .tools{display:flex;gap:2px;flex-shrink:0}
+.sl-row.locked{background:rgba(168,35,27,.06)}
+.sl-total{
+  display:flex;justify-content:space-between;align-items:baseline;padding-top:14px;
+  font-family:'Oswald',sans-serif;text-transform:uppercase;letter-spacing:2px;font-size:13px;
+}
+.sl-total .clock{font-family:'Alfa Slab One',serif;font-size:26px;letter-spacing:1px}
+.sl-total .clock.over{color:var(--red)}
+.arrow-up::before{content:"▲ "}
+.arrow-down::before{content:"▼ "}
+.arrow-mid::before{content:"◆ "}
+.gen-status{font-size:12px;color:var(--khaki);margin-top:8px;font-style:italic}
+
+/* ============ PRINT ============ */
+@media print{
+  body *{visibility:hidden}
+  .setlist-card,.setlist-card *{visibility:visible}
+  .setlist-card{position:absolute;top:0;left:0;width:100%;box-shadow:none;border:none}
+  .sl-row .tools,.tape{display:none!important}
+}
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+
+/* ============ SAVED SETS ============ */
+.saved-set-item{
+  display:flex;align-items:center;gap:10px;padding:8px 10px;
+  border:1.5px solid var(--ink);background:#FCF7EA;margin-bottom:8px;
+}
+.saved-set-info{flex:1;min-width:0}
+.saved-set-info strong{font-size:14px;font-weight:700;display:block}
+.saved-set-info small{font-family:'Oswald',sans-serif;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--khaki)}
+.badge.staple{background:var(--red);color:var(--paper);border-color:var(--red)}
