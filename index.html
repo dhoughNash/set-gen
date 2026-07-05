@@ -128,7 +128,8 @@ input:focus,select:focus{outline:3px solid var(--red);outline-offset:-1px}
 
 <main>
   <section class="col-left">
-    <h2>Song Database <span class="count" id="songCount"></span></h2>
+   <details class="song-list" id="dbBox" style="margin-top:0">
+      <summary>Song Database <span class="count" id="songCount"></span></summary>
     <form id="songForm" onsubmit="return false;">
       <label for="fTitle">Title</label>
       <input type="text" id="fTitle" autocomplete="off" placeholder="e.g. One Bar Left in Lubbock Tonight">
@@ -178,6 +179,7 @@ input:focus,select:focus{outline:3px solid var(--red);outline-offset:-1px}
         <button class="btn ghost" id="btnCancel" style="display:none">Cancel Edit</button>
       </div>
     </form>
+     </details>
    <details class="song-list" id="catalogBox">
       <summary>Catalog</summary>
       <div id="songList"></div>
@@ -563,9 +565,10 @@ $('btnWord').addEventListener('click',()=>{
 
 init();
 </script>
-  <script>
+<script>
   if (window.matchMedia("(min-width: 901px)").matches) {
     document.getElementById("catalogBox").open = true;
+    document.getElementById("dbBox").open = true;
   }
 </script>
 <script>
