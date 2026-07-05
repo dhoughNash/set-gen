@@ -58,6 +58,10 @@ input:focus,select:focus{outline:3px solid var(--red);outline-offset:-1px}
 
 /* SONG LIST */
 .song-list{margin-top:26px}
+  .song-list summary{font-family:'Oswald',sans-serif;text-transform:uppercase;letter-spacing:2.5px;font-size:14px;font-weight:600;border-bottom:2px solid var(--ink);padding-bottom:6px;margin-bottom:14px;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:baseline;}
+.song-list summary::-webkit-details-marker{display:none}
+.song-list summary::after{content:"▼ SHOW";font-size:11px;color:var(--khaki);letter-spacing:1px}
+.song-list[open] summary::after{content:"▲ HIDE"}
 .song-item{border:1.5px solid var(--ink);background:#FCF7EA;padding:8px 10px;margin-bottom:8px;display:flex;align-items:center;gap:10px;}
 .song-item .t-title{font-weight:700;font-size:14px;flex:1;min-width:0}
 .song-item .t-title small{display:block;font-weight:400;font-size:11px;color:var(--khaki);font-family:'Oswald',sans-serif;text-transform:uppercase;letter-spacing:1px}
@@ -174,10 +178,10 @@ input:focus,select:focus{outline:3px solid var(--red);outline-offset:-1px}
         <button class="btn ghost" id="btnCancel" style="display:none">Cancel Edit</button>
       </div>
     </form>
-    <div class="song-list">
-      <h2 style="margin-top:0">Catalog</h2>
+   <details class="song-list" id="catalogBox">
+      <summary>Catalog</summary>
       <div id="songList"></div>
-    </div>
+    </details>
   </section>
 
   <section class="col-right">
@@ -558,6 +562,11 @@ $('btnWord').addEventListener('click',()=>{
 });
 
 init();
+</script>
+  <script>
+  if (window.matchMedia("(min-width: 901px)").matches) {
+    document.getElementById("catalogBox").open = true;
+  }
 </script>
 <script>
   if ("serviceWorker" in navigator) {
