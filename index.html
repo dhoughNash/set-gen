@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#1A1714">
+<link rel="apple-touch-icon" href="/icon-192.png">
+  <title>Set List Developer</title>
+<link href="https://fonts.googleapis.com/css2?family=Alfa+Slab+One&family=Oswald:wght@400;500;600&family=Libre+Franklin:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{
+  --paper:#F6EEDD;
+  --paper-deep:#EFE3C8;
+  --ink:#1A140C;
+  --red:#A8231B;
+  --khaki:#8A7A55;
+  --line:#C9B98F;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--paper);color:var(--ink);font-family:'Libre Franklin',sans-serif;font-size:15px;line-height:1.5;}
+
+/* HEADER */
+header{border-bottom:6px double var(--ink);padding:26px 28px 18px;display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:8px;}
+header h1{font-family:'Alfa Slab One',serif;font-size:clamp(26px,4vw,42px);letter-spacing:.5px;text-transform:uppercase;line-height:1;}
+header h1 span{color:var(--red)}
+.tagline{font-family:'Oswald',sans-serif;text-transform:uppercase;letter-spacing:3px;font-size:12px;color:var(--khaki);}
+
+/* LAYOUT */
+main{display:grid;grid-template-columns:minmax(340px,460px) 1fr;gap:0;min-height:calc(100vh - 100px)}
+@media(max-width:900px){main{grid-template-columns:1fr}}
+
+  .col-left{border-right:2px solid var(--ink);padding:22px 24px 60px;background:var(--paper)}
+.col-right{padding:22px 28px 60px;background:var(--paper-deep)}
+h2{font-family:'Oswald',sans-serif;text-transform:uppercase;letter-spacing:2.5px;font-size:14px;font-weight:600;border-bottom:2px solid var(--ink);padding-bottom:6px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:baseline;}
+h2 .count{color:var(--khaki);letter-spacing:1px}
+
+/* FORMS */
+label{display:block;font-family:'Oswald',sans-serif;text-transform:uppercase;letter-spacing:1.5px;font-size:11px;font-weight:500;color:var(--khaki);margin:10px 0 3px;}
+input[type=text],input[type=number],input[type=password],select{width:100%;padding:8px 10px;border:1.5px solid var(--ink);background:#FCF7EA;font-family:'Libre Franklin',sans-serif;font-size:14px;color:var(--ink);border-radius:0;}
+input:focus,select:focus{outline:3px solid var(--red);outline-offset:-1px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.row3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
+.seg{display:flex;border:1.5px solid var(--ink);margin-top:2px}
+.seg button{flex:1;padding:7px 4px;background:#FCF7EA;border:none;border-right:1.5px solid var(--ink);cursor:pointer;font-family:'Oswald',sans-serif;text-transform:uppercase;letter-spacing:1px;font-size:12px;color:var(--ink);}
+.seg button:last-child{border-right:none}
+.seg button.on{background:var(--ink);color:var(--paper)}
+.seg button:focus-visible{outline:3px solid var(--red);outline-offset:-3px}
+.btn{display:inline-block;padding:10px 18px;border:2px solid var(--ink);background:var(--ink);color:var(--paper);font-family:'Oswald',sans-serif;text-transform:uppercase;letter-spacing:2px;font-size:13px;font-weight:600;cursor:pointer;border-radius:0;}
+.btn:hover{background:var(--red);border-color:var(--red)}
+.btn:focus-visible{outline:3px solid var(--red);outline-offset:2px}
+.btn.ghost{background:transparent;color:var(--ink)}
+.btn.ghost:hover{background:var(--ink);color:var(--paper)}
+.btn.red{background:var(--red);border-color:var(--red)}
+.btn.red:hover{background:var(--ink);border-color:var(--ink)}
+.btn.small{padding:5px 10px;font-size:11px;letter-spacing:1.5px}
+.btn-row{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap}
+
+/* SONG LIST */
+.song-list{margin-top:26px}
+  .song-list summary{font-family:'Oswald',sans-serif;text-transform:uppercase;letter-spacing:2.5px;font-size:14px;font-weight:600;border-bottom:2px solid var(--ink);padding-bottom:6px;margin-bottom:14px;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:baseline;}
+.song-list summary::-webkit-details-marker{display:none}
+.song-list summary::after{content:"▼ SHOW";font-size:11px;color:var(--khaki);letter-spacing:1px}
+.song-list[open] summary::after{content:"▲ HIDE"}
+.song-item{border:1.5px solid var(--ink);background:#FCF7EA;padding:8px 10px;margin-bottom:8px;display:flex;align-items:center;gap:10px;}
+.song-item .t-title{font-weight:700;font-size:14px;flex:1;min-width:0}
+.song-item .t-title small{display:block;font-weight:400;font-size:11px;color:var(--khaki);font-family:'Oswald',sans-serif;text-transform:uppercase;letter-spacing:1px}
+.badge{font-family:'Oswald',sans-serif;font-size:11px;letter-spacing:1px;text-transform:uppercase;padding:2px 7px;border:1.5px solid var(--ink);white-space:nowrap;}
+.badge.up{background:var(--ink);color:var(--paper)}
+.badge.down{background:transparent}
+.badge.mid{background:var(--line)}
+.badge.cover{border-color:var(--red);color:var(--red)}
+.badge.staple{background:var(--red);color:var(--paper);border-color:var(--red)}
+.mini{background:none;border:none;cursor:pointer;font-size:15px;padding:2px 5px;color:var(--khaki);}
+.mini:hover{color:var(--red)}
+.mini:focus-visible{outline:2px solid var(--red)}
+.empty-note{color:var(--khaki);font-style:italic;padding:14px 0}
+
+/* GENERATOR */
+.gen-panel{border:2px solid var(--ink);background:var(--paper);padding:18px;margin-bottom:26px}
+.check{display:flex;align-items:center;gap:8px;margin-top:10px;font-size:13px}
+.check input{width:16px;height:16px;accent-color:var(--red)}
+.check label{margin:0;display:inline;color:var(--ink);font-size:12px}
+
+/* SETLIST CARD */
+.setlist-card{background:#FBF4E2;border:3px solid var(--ink);box-shadow:8px 8px 0 var(--ink);padding:30px 34px 26px;position:relative;}
+.tape{position:absolute;top:-14px;left:50%;transform:translateX(-50%) rotate(-2deg);width:130px;height:28px;background:rgba(200,180,120,.55);border:1px solid rgba(0,0,0,.08);}
+.sl-head{text-align:center;border-bottom:3px solid var(--ink);padding-bottom:12px;margin-bottom:6px}
+.sl-head .show{font-family:'Alfa Slab One',serif;font-size:26px;text-transform:uppercase;line-height:1.1}
+.sl-head .sub{font-family:'Oswald',sans-serif;text-transform:uppercase;letter-spacing:3px;font-size:12px;color:var(--khaki);margin-top:4px}
+.sl-row{display:flex;align-items:baseline;gap:12px;padding:9px 0;border-bottom:1.5px dashed var(--line);}
+.sl-row .num{font-family:'Alfa Slab One',serif;font-size:18px;color:var(--red);width:30px;flex-shrink:0}
+.sl-row .name{font-family:'Alfa Slab One',serif;font-size:21px;text-transform:uppercase;letter-spacing:.5px;flex:1;line-height:1.15;min-width:0}
+.sl-row .name .intro-flag{font-family:'Oswald',sans-serif;font-size:11px;letter-spacing:1px;color:var(--red);display:block;text-transform:uppercase}
+.sl-row .meta{font-family:'Oswald',sans-serif;font-size:12px;letter-spacing:1px;color:var(--khaki);text-transform:uppercase;white-space:nowrap}
+.sl-row .tools{display:flex;gap:2px;flex-shrink:0}
+.sl-row.locked{background:rgba(168,35,27,.06)}
+.sl-total{display:flex;justify-content:space-between;align-items:baseline;padding-top:14px;font-family:'Oswald',sans-serif;text-transform:uppercase;letter-spacing:2px;font-size:13px;}
+.sl-total .clock{font-family:'Alfa Slab One',serif;font-size:26px;letter-spacing:1px}
+.sl-total .clock.over{color:var(--red)}
+.arrow-up::before{content:"▲ "}
+.arrow-down::before{content:"▼ "}
+.arrow-mid::before{content:"◆ "}
+.gen-status{font-size:12px;color:var(--khaki);margin-top:8px;font-style:italic}
+
+/* SAVED SETS */
+.saved-set-item{display:flex;align-items:center;gap:10px;padding:8px 10px;border:1.5px solid var(--ink);background:#FCF7EA;margin-bottom:8px;}
+.saved-set-info{flex:1;min-width:0}
+.saved-set-info strong{font-size:14px;font-weight:700;display:block}
+.saved-set-info small{font-family:'Oswald',sans-serif;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--khaki)}
+
+/* PRINT */
+@media print{
+  body *{visibility:hidden}
+  .setlist-card,.setlist-card *{visibility:visible}
+  .setlist-card{position:absolute;top:0;left:0;width:100%;box-shadow:none;border:none}
+  .sl-row .tools,.tape{display:none!important}
+}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+
+/* AUTH GATE */
+.auth-gate{position:fixed;inset:0;background:var(--paper);z-index:9999;align-items:center;justify-content:center;padding:20px;display:none;}
+body.locked .auth-gate{display:flex}
+body.locked header,body.locked main{display:none}
+.auth-box{max-width:380px;width:100%;border:3px solid var(--ink);background:#FBF4E2;box-shadow:8px 8px 0 var(--ink);padding:34px 30px;}
+.auth-box h1{font-family:'Alfa Slab One',serif;font-size:28px;text-transform:uppercase;text-align:center;line-height:1;}
+.auth-box h1 span{color:var(--red)}
+.auth-tagline{text-align:center;font-family:'Oswald',sans-serif;text-transform:uppercase;letter-spacing:3px;font-size:11px;color:var(--khaki);margin:6px 0 24px;}
+.auth-error{color:var(--red);font-size:12px;margin-top:10px;font-family:'Oswald',sans-serif;text-transform:uppercase;letter-spacing:.5px;min-height:14px}
+.auth-toggle{text-align:center;margin-top:18px;font-size:13px;}
+.auth-toggle a{color:var(--red);cursor:pointer;text-decoration:underline;}
+.header-account{font-family:'Oswald',sans-serif;text-transform:uppercase;letter-spacing:1px;font-size:11px;color:var(--khaki);margin-left:14px;}
+.header-account a{color:var(--red);cursor:pointer;text-decoration:underline;}
+
+/* PENDING APPROVAL */
+.pending-gate{position:fixed;inset:0;background:var(--paper);z-index:9998;align-items:center;justify-content:center;padding:20px;display:none;}
+body.pending .pending-gate{display:flex}
+body.pending .auth-gate{display:none}
+body.pending header,body.pending main{display:none}
+.pending-box{max-width:400px;width:100%;border:3px solid var(--ink);background:#FBF4E2;box-shadow:8px 8px 0 var(--ink);padding:34px 30px;text-align:center;}
+.pending-box h1{font-family:'Alfa Slab One',serif;font-size:24px;text-transform:uppercase;line-height:1;}
+.pending-box h1 span{color:var(--red)}
+.pending-box p{font-size:14px;margin:18px 0;color:var(--ink);}
+.pending-box .btn-row{justify-content:center}
+</style>
+</head>
+<body class="locked">
+
+<div class="auth-gate" id="authGate">
+  <div class="auth-box">
+    <h1>Set List <span>Developer</span></h1>
+    <div class="auth-tagline">Blue Amsterdam Studio &bull; Nashville, Tenn.</div>
+    <form id="authForm" onsubmit="return false;">
+      <label for="authEmail">Email</label>
+      <input type="text" id="authEmail" autocomplete="email" placeholder="you@example.com">
+      <label for="authPassword">Password</label>
+      <input type="password" id="authPassword" autocomplete="current-password" placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;">
+      <div class="auth-error" id="authError"></div>
+      <div class="btn-row" style="margin-top:16px">
+        <button type="button" class="btn red" id="authSubmit" style="flex:1">Log In</button>
+      </div>
+    </form>
+    <div class="auth-toggle" id="authToggle">Need an account? <a onclick="setAuthMode('signup')">Sign up</a></div>
+  </div>
+</div>
+
+<div class="pending-gate" id="pendingGate">
+  <div class="pending-box">
+    <h1>Almost <span>There</span></h1>
+    <p>Your account is created, but it's waiting on approval from Blue Amsterdam Studio before you can get in. Check back soon, or reach out if you were expecting quicker access.</p>
+    <div class="btn-row">
+      <button type="button" class="btn ghost" id="btnCheckApproval">Check Again</button>
+      <button type="button" class="btn ghost" id="btnPendingLogout">Log Out</button>
+    </div>
+  </div>
+</div>
+
+<header>
+  <h1>Set List <span>Developer</span></h1>
+  <div class="tagline">Blue Amsterdam Studio &bull; Nashville, Tenn.<span class="header-account" id="headerAccount"></span></div>
+</header>
+
+<main>
+  <section class="col-left">
+   <details class="song-list" id="dbBox" style="margin-top:0">
+      <summary>Song Database <span class="count" id="songCount"></span></summary>
+    <form id="songForm" onsubmit="return false;">
+      <label for="fTitle">Title</label>
+      <input type="text" id="fTitle" autocomplete="off" placeholder="e.g. One Bar Left in Lubbock Tonight">
+      <div class="row2">
+        <div>
+          <label>Tempo</label>
+          <div class="seg" id="fTempo" role="group">
+            <button type="button" data-v="up">Up</button>
+            <button type="button" data-v="mid">Mid</button>
+            <button type="button" data-v="down">Down</button>
+          </div>
+        </div>
+        <div>
+          <label>Original / Cover</label>
+          <div class="seg" id="fType" role="group">
+            <button type="button" data-v="original">Orig.</button>
+            <button type="button" data-v="cover">Cover</button>
+          </div>
+        </div>
+      </div>
+      <div class="row3">
+        <div><label for="fMin">Length (min)</label><input type="number" id="fMin" min="0" max="30" placeholder="3"></div>
+        <div><label for="fSec">(sec)</label><input type="number" id="fSec" min="0" max="59" placeholder="30"></div>
+        <div>
+          <label for="fIntro">Intro</label>
+          <select id="fIntro">
+            <option value="0">None</option>
+            <option value="30">0:30</option>
+            <option value="60">1:00</option>
+            <option value="90">1:30</option>
+            <option value="120">2:00</option>
+          </select>
+        </div>
+      </div>
+      <label for="fMood">Mood</label>
+      <input type="text" id="fMood" list="moodList" autocomplete="off" placeholder="Rowdy, heartfelt, story...">
+      <datalist id="moodList">
+        <option value="Rowdy"><option value="Party"><option value="Heartfelt">
+        <option value="Story"><option value="Ballad"><option value="Groove"><option value="Anthem">
+      </datalist>
+      <div class="check" style="margin-top:12px">
+        <input type="checkbox" id="fStaple">
+        <label for="fStaple">Staple — always include in every set</label>
+      </div>
+      <div class="btn-row">
+        <button class="btn" id="btnSave">Add Song</button>
+        <button class="btn ghost" id="btnCancel" style="display:none">Cancel Edit</button>
+      </div>
+    </form>
+     </details>
+   <details class="song-list" id="catalogBox">
+      <summary>Catalog</summary>
+      <div id="songList"></div>
+    </details>
+  </section>
+
+  <section class="col-right">
+    <div class="gen-panel">
+      <h2>Build the Set</h2>
+      <div class="row3">
+        <div><label for="gTarget">Set Length (min)</label><input type="number" id="gTarget" min="5" max="240" value="45"></div>
+        <div><label for="gOriginals"># of Originals</label><input type="number" id="gOriginals" min="0" max="50" placeholder="Any"></div>
+        <div><label for="gCovers"># of Covers</label><input type="number" id="gCovers" min="0" max="50" placeholder="Any"></div>
+      </div>
+      <div class="row2" style="margin-top:10px">
+        <div><label for="gMood">Mood Filter</label><select id="gMood"><option value="">All moods</option></select></div>
+      </div>
+      <div class="check"><input type="checkbox" id="gIntros" checked><label for="gIntros">Count song intros toward total time</label></div>
+      <div class="check"><input type="checkbox" id="gOpenUp" checked><label for="gOpenUp">Open with an up-tempo song</label></div>
+      <div class="check"><input type="checkbox" id="gCloseUp" checked><label for="gCloseUp">Close with an up-tempo song</label></div>
+      <div class="check"><input type="checkbox" id="gNoBB" checked><label for="gNoBB">Avoid back-to-back down-tempo songs</label></div>
+      <div class="row2" style="margin-top:12px">
+        <div><label for="gShow">Show / Venue</label><input type="text" id="gShow" placeholder="The Bluebird Cafe"></div>
+        <div><label for="gDate">Date</label><input type="text" id="gDate" placeholder="July 4, 2026"></div>
+      </div>
+      <div class="btn-row">
+        <button class="btn red" id="btnGenerate">Generate Set List</button>
+        <button class="btn ghost" id="btnSaveSet">Save Set</button>
+        <button class="btn ghost" id="btnPrint">Print</button>
+        <button class="btn ghost" id="btnWord">Download for Word</button>
+      </div>
+      <div class="gen-status" id="genStatus"></div>
+    </div>
+
+    <div class="gen-panel" style="margin-bottom:26px">
+      <h2>Saved Sets</h2>
+      <div id="savedSetlists"></div>
+    </div>
+
+    <div class="setlist-card" id="setlistCard">
+      <div class="tape"></div>
+      <div class="sl-head">
+        <div class="show" id="slShow">Set List</div>
+        <div class="sub" id="slSub">Hit Generate to build a set</div>
+      </div>
+      <div id="slRows"></div>
+      <div class="sl-total" id="slTotal" style="display:none">
+        <span>Total Run Time <span id="slTargetNote"></span></span>
+        <span class="clock" id="slClock">0:00</span>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script>
+const SUPABASE_URL      = 'https://drqprlrsvoaulsfqnmug.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_3TkViJg9X18WLl5Bdn7wxQ_Izid6RqX';
+const { createClient } = supabase;
+const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+const SETLIST_KEY = 'setlist-dev-setlist-v1';
+
+/* ── DB ── */
+async function loadSongs() {
+  const { data, error } = await db.from('songs').select('*').order('title');
+  if (error) { console.error(error); return []; }
+  return data;
+}
+async function upsertSong(song) {
+  song.user_id = currentUser.id;
+  const { error } = await db.from('songs').upsert(song, { onConflict: 'id' });
+  if (error) throw new Error(error.message);
+}
+async function deleteSongDb(id) {
+  const { error } = await db.from('songs').delete().eq('id', id);
+  if (error) throw new Error(error.message);
+}
+async function loadSavedSetlists() {
+  const { data, error } = await db.from('setlists').select('*').order('created_at', { ascending: false });
+  if (error) { console.error(error); return []; }
+  return data;
+}
+async function saveSetlistDb(name, items, show, date) {
+  const record = { id: 's' + Date.now() + Math.floor(Math.random() * 999), name, show, date, items: JSON.stringify(items), user_id: currentUser.id };
+  const { error } = await db.from('setlists').insert(record);
+  if (error) throw new Error(error.message);
+  return record;
+}
+async function deleteSetlistDb(id) {
+  const { error } = await db.from('setlists').delete().eq('id', id);
+  if (error) throw new Error(error.message);
+}
+function loadSetlist() { try { return JSON.parse(localStorage.getItem(SETLIST_KEY)) || []; } catch { return []; } }
+function saveSetlist(s) { localStorage.setItem(SETLIST_KEY, JSON.stringify(s)); }
+
+/* ── HELPERS ── */
+const $ = id => document.getElementById(id);
+
+/* ── STATE ── */
+let songs = [], setlist = [], savedSetlists = [], editingId = null, currentUser = null;
+
+async function init() {
+  songs = await loadSongs();
+  setlist = loadSetlist();
+  savedSetlists = await loadSavedSetlists();
+  renderSongs(); renderMoodFilter(); renderSetlist(); renderSavedSetlists();
+}
+
+/* ── AUTH ── */
+let authMode = 'signin';
+function setAuthMode(mode) {
+  authMode = mode;
+  $('authSubmit').textContent = mode === 'signin' ? 'Log In' : 'Sign Up';
+  $('authToggle').innerHTML = mode === 'signin'
+    ? 'Need an account? <a onclick="setAuthMode(\'signup\')">Sign up</a>'
+    : 'Already have an account? <a onclick="setAuthMode(\'signin\')">Log in</a>';
+  $('authError').textContent = '';
+}
+
+$('authSubmit').addEventListener('click', async () => {
+  const email = $('authEmail').value.trim(), password = $('authPassword').value;
+  if (!email || !password) { $('authError').textContent = 'Enter an email and password.'; return; }
+  $('authError').textContent = '';
+  try {
+    if (authMode === 'signin') {
+      const { error } = await db.auth.signInWithPassword({ email, password });
+      if (error) throw error;
+    } else {
+      const { error } = await db.auth.signUp({ email, password });
+      if (error) throw error;
+      $('authError').style.color = 'var(--ink)';
+      $('authError').textContent = 'Account created — check your email if confirmation is required, otherwise you\'re in.';
+    }
+  } catch (e) { $('authError').style.color = 'var(--red)'; $('authError').textContent = e.message; }
+});
+
+$('authPassword').addEventListener('keydown', e => { if (e.key === 'Enter') $('authSubmit').click(); });
+
+let resolvedUserId = null;
+
+async function onLogin(user) {
+  currentUser = user;
+  const { data: profile, error } = await db.from('profiles').select('approved').eq('id', user.id).single();
+  if (error || !profile || !profile.approved) {
+    resolvedUserId = null;
+    document.body.classList.remove('locked');
+    document.body.classList.add('pending');
+    return;
+  }
+  document.body.classList.remove('locked', 'pending');
+  if (resolvedUserId === user.id) return;
+  resolvedUserId = user.id;
+  $('headerAccount').innerHTML = esc(user.email) + ' &bull; <a id="btnLogout">Log Out</a>';
+  $('btnLogout').addEventListener('click', async () => { await db.auth.signOut(); });
+  await init();
+}
+
+function onLogout() {
+  currentUser = null;
+  resolvedUserId = null;
+  document.body.classList.remove('pending');
+  document.body.classList.add('locked');
+  $('authEmail').value = ''; $('authPassword').value = '';
+}
+
+$('btnCheckApproval').addEventListener('click', async () => {
+  if (currentUser) onLogin(currentUser);
+});
+$('btnPendingLogout').addEventListener('click', async () => { await db.auth.signOut(); });
+
+db.auth.onAuthStateChange((event, session) => {
+  if (session && session.user) onLogin(session.user);
+  else onLogout();
+});
+
+(async () => {
+  const { data: { session } } = await db.auth.getSession();
+  if (session && session.user) onLogin(session.user);
+  else onLogout();
+})();
+
+const fmt = s => Math.floor(s/60) + ':' + String(s%60).padStart(2,'0');
+const esc = t => t.replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const songById = id => songs.find(s => s.id === id);
+const songTime = (s, ci) => s.len + (ci ? s.intro : 0);
+const status = msg => $('genStatus').textContent = msg;
+
+function segInit(id, def) {
+  $(id).querySelectorAll('button').forEach(b => {
+    b.addEventListener('click', () => { $(id).querySelectorAll('button').forEach(x => x.classList.remove('on')); b.classList.add('on'); });
+  });
+  segSet(id, def);
+}
+function segSet(id, v) { $(id).querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.v === v)); }
+function segGet(id) { const on = $(id).querySelector('button.on'); return on ? on.dataset.v : null; }
+segInit('fTempo','up'); segInit('fType','original');
+
+/* ── SONG CRUD ── */
+$('btnSave').addEventListener('click', async () => {
+  const title = $('fTitle').value.trim();
+  if (!title) { $('fTitle').focus(); return; }
+  const len = (parseInt($('fMin').value)||0)*60 + (parseInt($('fSec').value)||0);
+  if (len <= 0) { $('fMin').focus(); return; }
+  const song = {
+    id: editingId || ('s' + Date.now() + Math.floor(Math.random()*999)),
+    title, tempo: segGet('fTempo')||'up', type: segGet('fType')||'original',
+    len, intro: parseInt($('fIntro').value)||0, mood: $('fMood').value.trim(), staple: $('fStaple').checked
+  };
+  try {
+    await upsertSong(song);
+    songs = editingId ? songs.map(s => s.id === editingId ? song : s) : [...songs, song];
+    resetForm(); renderSongs(); renderMoodFilter(); renderSetlist();
+  } catch(e) { status('Error saving: ' + e.message); }
+});
+
+$('btnCancel').addEventListener('click', resetForm);
+
+function resetForm() {
+  editingId = null;
+  $('fTitle').value=''; $('fMin').value=''; $('fSec').value=''; $('fMood').value='';
+  $('fIntro').value='0'; $('fStaple').checked=false;
+  segSet('fTempo','up'); segSet('fType','original');
+  $('btnSave').textContent='Add Song'; $('btnCancel').style.display='none';
+}
+
+function editSong(id) {
+  const s = songById(id); if (!s) return;
+  editingId = id;
+  $('fTitle').value=s.title; $('fMin').value=Math.floor(s.len/60); $('fSec').value=s.len%60;
+  $('fIntro').value=String(s.intro); $('fMood').value=s.mood||''; $('fStaple').checked=!!s.staple;
+  segSet('fTempo',s.tempo); segSet('fType',s.type);
+  $('btnSave').textContent='Save Changes'; $('btnCancel').style.display='inline-block';
+  $('fTitle').focus();
+}
+
+async function deleteSong(id) {
+  const s = songById(id);
+  if (!confirm('Delete "' + (s?s.title:'this song') + '"?')) return;
+  try {
+    await deleteSongDb(id);
+    songs = songs.filter(x => x.id !== id);
+    setlist = setlist.filter(x => x.songId !== id);
+    saveSetlist(setlist); renderSongs(); renderMoodFilter(); renderSetlist();
+  } catch(e) { status('Error deleting: ' + e.message); }
+}
+
+function renderSongs() {
+  $('songCount').textContent = songs.length ? songs.length + ' songs' : '';
+  const el = $('songList');
+  if (!songs.length) { el.innerHTML='<div class="empty-note">No songs yet.</div>'; return; }
+  el.innerHTML = songs.slice().sort((a,b)=>a.title.localeCompare(b.title)).map(s =>
+    '<div class="song-item">' +
+      '<div class="t-title">' + esc(s.title) + '<small>' + fmt(s.len) + (s.intro?' + '+fmt(s.intro)+' intro':'') + (s.mood?' &bull; '+esc(s.mood):'') + '</small></div>' +
+      '<span class="badge ' + s.tempo + '">' + s.tempo + '</span>' +
+      (s.type==='cover'?'<span class="badge cover">Cover</span>':'') +
+      (s.staple?'<span class="badge staple">&#9733; Staple</span>':'') +
+      '<button class="mini" onclick="editSong(\'' + s.id + '\')">&#9998;</button>' +
+      '<button class="mini" onclick="deleteSong(\'' + s.id + '\')">&#10005;</button>' +
+    '</div>'
+  ).join('');
+}
+
+function renderMoodFilter() {
+  const moods = [...new Set(songs.map(s=>s.mood).filter(Boolean))].sort();
+  const sel=$('gMood'), cur=sel.value;
+  sel.innerHTML='<option value="">All moods</option>'+moods.map(m=>'<option value="'+esc(m)+'">'+esc(m)+'</option>').join('');
+  sel.value=(cur&&moods.includes(cur))?cur:'';
+}
+
+/* ── GENERATOR ── */
+function shuffle(a) { for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; }
+
+$('btnGenerate').addEventListener('click', () => {
+  const target = (parseInt($('gTarget').value)||45)*60;
+  const ci = $('gIntros').checked;
+  const mood = $('gMood').value;
+  const nOrig = $('gOriginals').value !== '' ? parseInt($('gOriginals').value) : null;
+  const nCov  = $('gCovers').value    !== '' ? parseInt($('gCovers').value)    : null;
+
+  const poolAll  = songs.filter(s => !mood || s.mood===mood);
+  const poolOrig = poolAll.filter(s => s.type==='original');
+  const poolCov  = poolAll.filter(s => s.type==='cover');
+
+  if (nOrig!==null && poolOrig.length<nOrig) { status('Not enough originals (have '+poolOrig.length+', need '+nOrig+').'); return; }
+  if (nCov !==null && poolCov.length <nCov)  { status('Not enough covers (have '+poolCov.length+', need '+nCov+').'); return; }
+
+  const staples   = songs.filter(s => s.staple);
+  const locked    = setlist.filter(x => x.locked && songById(x.songId));
+  const lockedIds = new Set([...locked.map(x=>x.songId), ...staples.map(s=>s.id)]);
+  const lockedAll = [...locked, ...staples.filter(s=>!locked.find(x=>x.songId===s.id)).map(s=>({songId:s.id,locked:true}))];
+
+  let best=null, bestDiff=Infinity;
+
+  for (let attempt=0; attempt<400; attempt++) {
+    let list  = lockedAll.map(x=>songById(x.songId)).filter(Boolean);
+    let total = list.reduce((t,s)=>t+songTime(s,ci),0);
+    const lOrig = list.filter(s=>s.type==='original').length;
+    const lCov  = list.filter(s=>s.type==='cover').length;
+
+    const aOrig = shuffle(poolOrig.filter(s=>!lockedIds.has(s.id)));
+    const aCov  = shuffle(poolCov.filter(s=>!lockedIds.has(s.id)));
+
+    let picks = [];
+    if (nOrig!==null) { const need=nOrig-lOrig; if(need>aOrig.length) continue; if(need>0) picks.push(...aOrig.slice(0,need)); }
+    if (nCov !==null) { const need=nCov -lCov;  if(need>aCov.length)  continue; if(need>0) picks.push(...aCov.slice(0,need));  }
+    for (const s of picks) { total+=songTime(s,ci); list.push(s); }
+
+    const usedIds = new Set([...lockedIds, ...picks.map(s=>s.id)]);
+    const filler  = shuffle(poolAll.filter(s => {
+      if (usedIds.has(s.id)) return false;
+      if (nOrig!==null && s.type==='original') return false;
+      if (nCov !==null && s.type==='cover')    return false;
+      return true;
+    }));
+    for (const s of filler) {
+      const t=songTime(s,ci);
+      if (total+t<=target+60) { list.push(s); total+=t; }
+      if (total>=target-90) break;
+    }
+    if (list.length<2) continue;
+    list=arrangeSet(list); if(!list) continue;
+    const diff=Math.abs(target-total)+(total>target+60?10000:0);
+    if (diff<bestDiff) { bestDiff=diff; best={list,total}; }
+    if (bestDiff<=45) break;
+  }
+
+  if (!best) { status('Could not build a set — try loosening the rules.'); return; }
+  setlist = best.list.map(s=>({songId:s.id, locked:lockedIds.has(s.id)}));
+  saveSetlist(setlist); renderSetlist();
+  const oc=best.list.filter(s=>s.type==='original').length, cc=best.list.filter(s=>s.type==='cover').length;
+  status('Set built: '+best.list.length+' songs ('+oc+' orig / '+cc+' covers), '+fmt(best.total)+' against a '+fmt(target)+' target.');
+});
+
+function arrangeSet(list) {
+  const openUp=$('gOpenUp').checked, closeUp=$('gCloseUp').checked, noBB=$('gNoBB').checked;
+  let arr=shuffle(list.slice());
+  for (let tries=0;tries<300;tries++) {
+    let ok=true;
+    if (openUp && arr[0].tempo!=='up') ok=false;
+    if (ok&&closeUp&&arr[arr.length-1].tempo!=='up') ok=false;
+    if (ok&&noBB) { for(let i=1;i<arr.length;i++){if(arr[i].tempo==='down'&&arr[i-1].tempo==='down'){ok=false;break;}} }
+    if (ok) return arr;
+    arr=shuffle(arr);
+  }
+  return list;
+}
+
+/* ── SETLIST RENDER ── */
+function renderSetlist() {
+  const ci=$('gIntros').checked, rows=$('slRows'), show=$('gShow').value.trim();
+  $('slShow').textContent=show||'Set List';
+  const items=setlist.map(x=>songById(x.songId)).filter(Boolean);
+  if (!items.length) { $('slSub').textContent='Hit Generate to build a set'; rows.innerHTML=''; $('slTotal').style.display='none'; return; }
+  const date=$('gDate').value.trim();
+  $('slSub').textContent=(date?date+' \u2022 ':'')+'Mason Douglas';
+  let total=0;
+  rows.innerHTML=setlist.map((x,i)=>{
+    const s=songById(x.songId); if(!s) return '';
+    total+=songTime(s,ci);
+    return '<div class="sl-row '+(x.locked?'locked':'')+'">' +
+      '<span class="num">'+(i+1)+'</span>' +
+      '<span class="name">'+esc(s.title)+(s.intro?'<span class="intro-flag">'+fmt(s.intro)+' intro</span>':'')+'</span>' +
+      '<span class="meta arrow-'+s.tempo+'">'+fmt(s.len)+(s.type==='cover'?' &bull; cover':'')+'</span>' +
+      '<span class="tools">' +
+        '<button class="mini" onclick="moveRow('+i+',-1)">&#8593;</button>' +
+        '<button class="mini" onclick="moveRow('+i+',1)">&#8595;</button>' +
+        '<button class="mini" onclick="toggleLock('+i+')">'+(x.locked?'&#128274;':'&#128275;')+'</button>' +
+        '<button class="mini" onclick="swapRow('+i+')">&#8635;</button>' +
+        '<button class="mini" onclick="removeRow('+i+')">&#10005;</button>' +
+      '</span></div>';
+  }).join('');
+  const target=(parseInt($('gTarget').value)||45)*60;
+  $('slTotal').style.display='flex';
+  $('slTargetNote').textContent='(target '+fmt(target)+')';
+  const clock=$('slClock');
+  clock.textContent=fmt(total);
+  clock.classList.toggle('over',total>target+60);
+}
+
+function moveRow(i,d){const j=i+d;if(j<0||j>=setlist.length)return;[setlist[i],setlist[j]]=[setlist[j],setlist[i]];saveSetlist(setlist);renderSetlist();}
+function toggleLock(i){setlist[i].locked=!setlist[i].locked;saveSetlist(setlist);renderSetlist();}
+function removeRow(i){setlist.splice(i,1);saveSetlist(setlist);renderSetlist();}
+function swapRow(i){
+  const used=new Set(setlist.map(x=>x.songId)), cur=songById(setlist[i].songId);
+  const pool=songs.filter(s=>!used.has(s.id)&&(!$('gMood').value||s.mood===$('gMood').value));
+  if(!pool.length){status('No unused songs left.');return;}
+  pool.sort((a,b)=>Math.abs(a.len-cur.len)+(a.tempo===cur.tempo?0:120)-(Math.abs(b.len-cur.len)+(b.tempo===cur.tempo?0:120)));
+  setlist[i]={songId:pool[Math.floor(Math.random()*Math.min(3,pool.length))].id,locked:false};
+  saveSetlist(setlist);renderSetlist();
+}
+['gTarget','gIntros','gShow','gDate'].forEach(id=>$(id).addEventListener('input',renderSetlist));
+
+/* ── SAVE / LOAD SETS ── */
+$('btnSaveSet').addEventListener('click', async () => {
+  if (!setlist.filter(x=>songById(x.songId)).length) { status('Generate a set first.'); return; }
+  const name=prompt('Name this set list:');
+  if (!name||!name.trim()) return;
+  try {
+    const record=await saveSetlistDb(name.trim(),setlist,$('gShow').value.trim(),$('gDate').value.trim());
+    savedSetlists=[record,...savedSetlists]; renderSavedSetlists(); status('Saved: '+name.trim());
+  } catch(e){status('Error saving: '+e.message);}
+});
+
+function renderSavedSetlists() {
+  const el=$('savedSetlists');
+  if(!savedSetlists.length){el.innerHTML='<div class="empty-note">No saved sets yet.</div>';return;}
+  el.innerHTML=savedSetlists.map(sl=>
+    '<div class="saved-set-item">' +
+      '<div class="saved-set-info"><strong>'+esc(sl.name)+'</strong>' +
+      '<small>'+(sl.show?esc(sl.show)+(sl.date?' &bull; '+esc(sl.date):''):(sl.date||''))+'</small></div>' +
+      '<button class="btn small ghost" onclick="loadSavedSet(\''+sl.id+'\')">Load</button>' +
+      '<button class="mini" onclick="deleteSavedSet(\''+sl.id+'\')">&#10005;</button>' +
+    '</div>'
+  ).join('');
+}
+
+function loadSavedSet(id) {
+  const sl=savedSetlists.find(x=>x.id===id); if(!sl) return;
+  try {
+    setlist=JSON.parse(sl.items); saveSetlist(setlist);
+    if(sl.show) $('gShow').value=sl.show;
+    if(sl.date) $('gDate').value=sl.date;
+    renderSetlist(); status('Loaded: '+sl.name);
+  } catch(e){status('Error loading: '+e.message);}
+}
+
+async function deleteSavedSet(id) {
+  const sl=savedSetlists.find(x=>x.id===id);
+  if(!confirm('Delete "'+( sl?sl.name:'')+'"?')) return;
+  try { await deleteSetlistDb(id); savedSetlists=savedSetlists.filter(x=>x.id!==id); renderSavedSetlists(); }
+  catch(e){status('Error: '+e.message);}
+}
+
+/* ── EXPORT ── */
+$('btnPrint').addEventListener('click',()=>window.print());
+
+$('btnWord').addEventListener('click',()=>{
+  const items=setlist.map(x=>songById(x.songId)).filter(Boolean);
+  if(!items.length){status('Generate a set first.');return;}
+  const ci=$('gIntros').checked, show=esc($('gShow').value.trim()||'Set List'), date=esc($('gDate').value.trim());
+  let total=0;
+  const rows=items.map((s,i)=>{
+    total+=songTime(s,ci);
+    return '<tr><td style="font-size:16pt;color:#A8231B;font-weight:bold;padding:8pt 10pt 8pt 0;vertical-align:top;">'+(i+1)+'.</td>' +
+      '<td style="font-size:20pt;font-weight:bold;text-transform:uppercase;padding:8pt 0;border-bottom:1pt dashed #999;">'+esc(s.title)+(s.intro?'<br><span style="font-size:10pt;color:#A8231B;">'+fmt(s.intro)+' INTRO</span>':'')+'</td>' +
+      '<td style="font-size:11pt;color:#555;text-align:right;padding:8pt 0;border-bottom:1pt dashed #999;white-space:nowrap;vertical-align:top;">'+s.tempo.toUpperCase()+' &bull; '+fmt(s.len)+(s.type==='cover'?' &bull; COVER':'')+'</td></tr>';
+  }).join('');
+  const html='<!DOCTYPE html><html><head><meta charset="utf-8"><title>'+show+'</title></head><body style="font-family:Arial Black,Arial,sans-serif;">' +
+    '<div style="text-align:center;border-bottom:3pt solid #000;padding-bottom:10pt;margin-bottom:6pt;"><span style="font-size:28pt;font-weight:bold;text-transform:uppercase;">'+show+'</span><br>' +
+    '<span style="font-size:11pt;letter-spacing:2pt;color:#555;">'+(date?date+' &bull; ':'')+'MASON DOUGLAS</span></div>' +
+    '<table style="width:100%;border-collapse:collapse;">'+rows+'</table>' +
+    '<p style="text-align:right;font-size:14pt;font-weight:bold;margin-top:14pt;">TOTAL: '+fmt(total)+'</p></body></html>';
+  const blob=new Blob(['\ufeff'+html],{type:'application/msword'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob); a.download=(show.replace(/[^a-z0-9]+/gi,'-')||'set-list')+'.doc'; a.click();
+  URL.revokeObjectURL(a.href);
+});
+
+</script>
+<script>
+  if (window.matchMedia("(min-width: 901px)").matches) {
+    document.getElementById("catalogBox").open = true;
+    document.getElementById("dbBox").open = true;
+  }
+</script>
+<script>
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+      navigator.serviceWorker.register("/sw.js");
+    });
+  }
+</script>
+</body>
+</html>
