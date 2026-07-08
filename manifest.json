@@ -1,6 +1,6 @@
 {
-  "name": "Set List Developer",
-  "short_name": "Set List",
+  "name": "Set Gen",
+  "short_name": "Set Gen",
   "description": "Song catalog and set list generator — Blue Amsterdam Studio, Nashville, Tenn.",
   "start_url": "/",
   "display": "standalone",
