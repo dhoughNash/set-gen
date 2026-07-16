@@ -119,7 +119,7 @@ input:focus,select:focus{outline:3px solid var(--red);outline-offset:-1px}
   body *{visibility:hidden}
   .setlist-card,.setlist-card *{visibility:visible}
   .setlist-card{position:absolute;top:0;left:0;width:100%;box-shadow:none;border:none}
-  .sl-row .tools,.tape,.sl-row .meta,.sl-total,.intro-flag{display:none!important}
+ .sl-row .tools,.tape,.sl-row .meta,.sl-total,.intro-flag,#slAdd{display:none!important}
 }
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
 
@@ -335,6 +335,10 @@ body.pending header,body.pending main{display:none}
         <div class="sub tune" id="slTune" style="display:none"></div>
       </div>
       <div id="slRows"></div>
+      <div id="slAdd" style="display:none;margin-top:16px;padding-top:12px;border-top:2px dashed var(--ink);gap:8px;align-items:center;">
+        <select id="slAddPick" style="flex:1;min-width:0;"></select>
+        <button class="mini" onclick="addSongToSet()">&#43; Add</button>
+      </div>
       <div class="sl-total" id="slTotal" style="display:none">
         <span>Total Run Time <span id="slTargetNote"></span></span>
         <span class="clock" id="slClock">0:00</span>
@@ -681,6 +685,7 @@ function arrangeSet(list) {
 
 /* ── SETLIST RENDER ── */
 function renderSetlist() {
+  renderAddPicker();
   const ci=$('gIntros').checked, rows=$('slRows'), show=$('gShow').value.trim();
   $('slShow').textContent=show||'Set List';
   const items=setlist.map(x=>songById(x.songId)).filter(Boolean);
@@ -718,6 +723,23 @@ function renderSetlist() {
 function moveRow(i,d){const j=i+d;if(j<0||j>=setlist.length)return;[setlist[i],setlist[j]]=[setlist[j],setlist[i]];saveSetlist(setlist);renderSetlist();}
 function toggleLock(i){setlist[i].locked=!setlist[i].locked;saveSetlist(setlist);renderSetlist();}
 function removeRow(i){setlist.splice(i,1);saveSetlist(setlist);renderSetlist();}
+  function renderAddPicker(){
+  const box=$('slAdd'), pick=$('slAddPick');
+  if(!setlist.filter(x=>songById(x.songId)).length){box.style.display='none';return;}
+  const used=new Set(setlist.map(x=>x.songId));
+  const pool=songs.filter(s=>!used.has(s.id)).sort((a,b)=>a.title.localeCompare(b.title));
+  if(!pool.length){box.style.display='none';return;}
+  const cur=pick.value;
+  pick.innerHTML='<option value="">Add a song&hellip;</option>'+pool.map(s=>'<option value="'+s.id+'">'+esc(s.title)+'</option>').join('');
+  pick.value=cur&&pool.some(s=>s.id===cur)?cur:'';
+  box.style.display='flex';
+}
+function addSongToSet(){
+  const id=$('slAddPick').value;
+  if(!id){status('Pick a song from the dropdown first.');return;}
+  setlist.unshift({songId:id,locked:false});
+  saveSetlist(setlist);renderSetlist();
+}
 function swapRow(i){
   const used=new Set(setlist.map(x=>x.songId)), cur=songById(setlist[i].songId);
   const pool=songs.filter(s=>!used.has(s.id)&&(!$('gMood').value||s.mood===$('gMood').value));
