@@ -622,11 +622,16 @@ $('btnGenerate').addEventListener('click', () => {
   if (nOrig!==null && poolOrig.length<nOrig) { status('Not enough originals (have '+poolOrig.length+', need '+nOrig+').'); return; }
   if (nCov !==null && poolCov.length <nCov)  { status('Not enough covers (have '+poolCov.length+', need '+nCov+').'); return; }
 
-  const staples   = songs.filter(s => s.staple);
+  // Staples are forced in — EXCEPT for a type with an explicit count, which acts
+  // as a hard cap. Staples of a capped type stop being auto-locked and instead
+  // become priority candidates (preferred first) that never exceed the count.
+  const stapleIds = new Set(songs.filter(s => s.staple).map(s => s.id));
+  const staples   = songs.filter(s => s.staple
+    && !(nOrig!==null && s.type==='original')
+    && !(nCov !==null && s.type==='cover'));
   const locked    = setlist.filter(x => x.locked && songById(x.songId));
   const lockedIds = new Set([...locked.map(x=>x.songId), ...staples.map(s=>s.id)]);
   const lockedAll = [...locked, ...staples.filter(s=>!locked.find(x=>x.songId===s.id)).map(s=>({songId:s.id,locked:true}))];
-
   let best=null, bestDiff=Infinity;
 
   for (let attempt=0; attempt<400; attempt++) {
@@ -635,8 +640,9 @@ $('btnGenerate').addEventListener('click', () => {
     const lOrig = list.filter(s=>s.type==='original').length;
     const lCov  = list.filter(s=>s.type==='cover').length;
 
-    const aOrig = shuffle(poolOrig.filter(s=>!lockedIds.has(s.id)));
-    const aCov  = shuffle(poolCov.filter(s=>!lockedIds.has(s.id)));
+    const byStaple = a => a.sort((x,y)=>(stapleIds.has(y.id)?1:0)-(stapleIds.has(x.id)?1:0));
+    const aOrig = byStaple(shuffle(poolOrig.filter(s=>!lockedIds.has(s.id))));
+    const aCov  = byStaple(shuffle(poolCov.filter(s=>!lockedIds.has(s.id))));
 
     let picks = [];
     if (nOrig!==null) { const need=nOrig-lOrig; if(need>aOrig.length) continue; if(need>0) picks.push(...aOrig.slice(0,need)); }
