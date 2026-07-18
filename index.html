@@ -669,7 +669,7 @@ $('btnGenerate').addEventListener('click', () => {
   }
 
   if (!best) { status('Could not build a set — try loosening the rules.'); return; }
-  setlist = best.list.map(s=>({songId:s.id, locked:lockedIds.has(s.id)}));
+  setlist = best.list.map(s=>({songId:s.id, locked: locked.some(x=>x.songId===s.id)}));
   saveSetlist(setlist); renderSetlist();
   const oc=best.list.filter(s=>s.type==='original').length, cc=best.list.filter(s=>s.type==='cover').length;
   status('Set built: '+best.list.length+' songs ('+oc+' orig / '+cc+' covers), '+fmt(best.total)+' against a '+fmt(target)+' target.');
