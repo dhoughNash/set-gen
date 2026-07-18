@@ -314,7 +314,8 @@ body.pending header,body.pending main{display:none}
         <div><label for="gDate">Date</label><input type="text" id="gDate" placeholder="July 4, 2026"></div>
       </div>
       <div class="btn-row">
-        <button class="btn red" id="btnGenerate">Generate Set List</button>
+       <button class="btn red" id="btnGenerate">Generate Set List</button>
+        <button class="btn ghost" id="btnClearSet">Clear Set</button>
         <button class="btn ghost" id="btnSaveSet">Save Set</button>
         <button class="btn ghost" id="btnPrint">Print</button>
         <button class="btn ghost" id="btnWord">Download for Word</button>
@@ -816,7 +817,12 @@ $('btnWord').addEventListener('click',()=>{
   const blob=new Blob(['\ufeff'+html],{type:'application/msword'});
   const a=document.createElement('a');
   a.href=URL.createObjectURL(blob); a.download=(show.replace(/[^a-z0-9]+/gi,'-')||'set-list')+'.doc'; a.click();
-  URL.revokeObjectURL(a.href);
+URL.revokeObjectURL(a.href);
+});
+
+$('btnClearSet').addEventListener('click',()=>{
+  if(setlist.filter(x=>songById(x.songId)).length && !confirm('Clear the current set? This empties the working setlist. Saved sets are not affected.')) return;
+  setlist=[]; saveSetlist(setlist); renderSetlist(); status('Set cleared.');
 });
 
 </script>
