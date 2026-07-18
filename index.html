@@ -95,6 +95,7 @@ input:focus,select:focus{outline:3px solid var(--red);outline-offset:-1px}
 .sl-row .num{font-family:'Alfa Slab One',serif;font-size:18px;color:var(--red);width:30px;flex-shrink:0}
 .sl-row .name{font-family:'Alfa Slab One',serif;font-size:21px;text-transform:uppercase;letter-spacing:.5px;flex:1;line-height:1.15;min-width:0}
 .sl-row .name .intro-flag{font-family:'Oswald',sans-serif;font-size:11px;letter-spacing:1px;color:var(--red);display:block;text-transform:uppercase}
+  .sl-row .name .staple-star{color:var(--red);font-size:.7em;vertical-align:middle;margin-right:1px}
 .key-tag{color:var(--red);font-size:.82em;white-space:nowrap;text-transform:none}
 .key-tag sup{font-size:.62em;vertical-align:super}
 .sl-row .meta{font-family:'Oswald',sans-serif;font-size:12px;letter-spacing:1px;color:var(--khaki);text-transform:uppercase;white-space:nowrap}
@@ -119,7 +120,7 @@ input:focus,select:focus{outline:3px solid var(--red);outline-offset:-1px}
   body *{visibility:hidden}
   .setlist-card,.setlist-card *{visibility:visible}
   .setlist-card{position:absolute;top:0;left:0;width:100%;box-shadow:none;border:none}
- .sl-row .tools,.tape,.sl-row .meta,.sl-total,.intro-flag,#slAdd{display:none!important}
+ .sl-row .tools,.tape,.sl-row .meta,.sl-total,.intro-flag,.staple-star,#slAdd{display:none!important}
 }
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
 
@@ -709,7 +710,7 @@ function renderSetlist() {
     total+=songTime(s,ci);
     return '<div class="sl-row '+(x.locked?'locked':'')+'">' +
       '<span class="num">'+(i+1)+'</span>' +
-      '<span class="name">'+esc(s.title)+(keyDisplayHTML(s)?' <span class="key-tag">'+keyDisplayHTML(s)+'</span>':'')+(s.intro?'<span class="intro-flag">'+fmt(s.intro)+' intro</span>':'')+'</span>' +
+    '<span class="name">'+(s.staple?'<span class="staple-star">&#9733;</span> ':'')+esc(s.title)+(keyDisplayHTML(s)?' <span class="key-tag">'+keyDisplayHTML(s)+'</span>':'')+(s.intro?'<span class="intro-flag">'+fmt(s.intro)+' intro</span>':'')+'</span>' +
       '<span class="meta arrow-'+s.tempo+'">'+fmt(s.len)+(s.type==='cover'?' &bull; cover':'')+'</span>' +
       '<span class="tools">' +
         '<button class="mini" onclick="moveRow('+i+',-1)">&#8593;</button>' +
