@@ -1,19 +1,3 @@
-// netlify/functions/stripe-webhook.js
-//
-// Receives Stripe (Managed Payments) subscription events and updates the
-// matching Supabase user's subscription status. This replaces the earlier
-// lemon-webhook.js — that file can be deleted/ignored.
-//
-// Required Netlify environment variables:
-//   STRIPE_SECRET_KEY        — Stripe Dashboard → Developers → API keys (secret key)
-//   STRIPE_WEBHOOK_SECRET    — shown when you create the webhook endpoint (Step 4 below)
-//   SUPABASE_URL             — your Supabase project URL
-//   SUPABASE_SERVICE_ROLE_KEY — Supabase → Project Settings → API (service_role, secret)
-//
-// Also add "stripe" as a dependency: run `npm install stripe` in the same
-// directory as your netlify/functions folder (or repo root, if that's where
-// your package.json lives) before deploying.
-
 const Stripe = require('stripe');
 const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 
@@ -47,11 +31,10 @@ exports.handler = async function (event) {
 
   switch (stripeEvent.type) {
     case 'checkout.session.completed': {
-      // Fired once, right after a successful Payment Link checkout.
       const session = stripeEvent.data.object;
       const userId = session.client_reference_id;
       const customerId = session.customer;
-      if (!userId) break; // shouldn't happen if the Payment Link URL always includes it
+      if (!userId) break;
       await patchSubscription(`user_id=eq.${userId}`, {
         status: 'active',
         stripe_customer_id: customerId,
@@ -60,7 +43,6 @@ exports.handler = async function (event) {
     }
 
     case 'customer.subscription.updated': {
-      // Fired on renewals, plan changes, payment failures, etc.
       const sub = stripeEvent.data.object;
       let status = 'free';
       if (['active', 'trialing'].includes(sub.status)) status = 'active';
@@ -77,7 +59,6 @@ exports.handler = async function (event) {
     }
 
     default:
-      // Unhandled event type — acknowledge and ignore.
       break;
   }
 
