@@ -20,22 +20,18 @@
 }
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:var(--paper);color:var(--ink);font-family:'Libre Franklin',sans-serif;font-size:15px;line-height:1.5;}
-
 /* HEADER */
 header{border-bottom:6px double var(--ink);padding:26px 28px 18px;display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:8px;}
 header h1{font-family:'Alfa Slab One',serif;font-size:clamp(26px,4vw,42px);letter-spacing:.5px;text-transform:uppercase;line-height:1;}
 header h1 span{color:var(--red)}
 .tagline{font-family:'Oswald',sans-serif;text-transform:uppercase;letter-spacing:3px;font-size:12px;color:var(--khaki);}
-
 /* LAYOUT */
 main{display:grid;grid-template-columns:minmax(340px,460px) 1fr;gap:0;min-height:calc(100vh - 100px)}
 @media(max-width:900px){main{grid-template-columns:1fr}}
-
   .col-left{border-right:2px solid var(--ink);padding:22px 24px 60px;background:var(--paper)}
 .col-right{padding:22px 28px 60px;background:var(--paper-deep)}
 h2{font-family:'Oswald',sans-serif;text-transform:uppercase;letter-spacing:2.5px;font-size:14px;font-weight:600;border-bottom:2px solid var(--ink);padding-bottom:6px;margin-bottom:14px;display:flex;justify-content:space-between;align-items:baseline;}
 h2 .count{color:var(--khaki);letter-spacing:1px}
-
 /* FORMS */
 label{display:block;font-family:'Oswald',sans-serif;text-transform:uppercase;letter-spacing:1.5px;font-size:11px;font-weight:500;color:var(--khaki);margin:10px 0 3px;}
 input[type=text],input[type=number],input[type=password],select{width:100%;padding:8px 10px;border:1.5px solid var(--ink);background:#FCF7EA;font-family:'Libre Franklin',sans-serif;font-size:14px;color:var(--ink);border-radius:0;}
@@ -56,7 +52,6 @@ input:focus,select:focus{outline:3px solid var(--red);outline-offset:-1px}
 .btn.red:hover{background:var(--ink);border-color:var(--ink)}
 .btn.small{padding:5px 10px;font-size:11px;letter-spacing:1.5px}
 .btn-row{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap}
-
 /* SONG LIST */
 .song-list{margin-top:26px}
   .song-list summary{font-family:'Oswald',sans-serif;text-transform:uppercase;letter-spacing:2.5px;font-size:14px;font-weight:600;border-bottom:2px solid var(--ink);padding-bottom:6px;margin-bottom:14px;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:baseline;}
@@ -76,13 +71,11 @@ input:focus,select:focus{outline:3px solid var(--red);outline-offset:-1px}
 .mini:hover{color:var(--red)}
 .mini:focus-visible{outline:2px solid var(--red)}
 .empty-note{color:var(--khaki);font-style:italic;padding:14px 0}
-
 /* GENERATOR */
 .gen-panel{border:2px solid var(--ink);background:var(--paper);padding:18px;margin-bottom:26px}
 .check{display:flex;align-items:center;gap:8px;margin-top:10px;font-size:13px}
 .check input{width:16px;height:16px;accent-color:var(--red)}
 .check label{margin:0;display:inline;color:var(--ink);font-size:12px}
-
 /* SETLIST CARD */
 .setlist-card{background:#FBF4E2;border:3px solid var(--ink);box-shadow:8px 8px 0 var(--ink);padding:30px 34px 26px;position:relative;}
 .tape{position:absolute;top:-14px;left:50%;transform:translateX(-50%) rotate(-2deg);width:130px;height:28px;background:rgba(200,180,120,.55);border:1px solid rgba(0,0,0,.08);}
@@ -108,13 +101,11 @@ input:focus,select:focus{outline:3px solid var(--red);outline-offset:-1px}
 .arrow-down::before{content:"▼ ";color:#ED1C24}
 .arrow-mid::before{content:"◆ "}
 .gen-status{font-size:12px;color:var(--khaki);margin-top:8px;font-style:italic}
-
 /* SAVED SETS */
 .saved-set-item{display:flex;align-items:center;gap:10px;padding:8px 10px;border:1.5px solid var(--ink);background:#FCF7EA;margin-bottom:8px;}
 .saved-set-info{flex:1;min-width:0}
 .saved-set-info strong{font-size:14px;font-weight:700;display:block}
 .saved-set-info small{font-family:'Oswald',sans-serif;font-size:11px;text-transform:uppercase;letter-spacing:1px;color:var(--khaki)}
-
 /* PRINT */
 @media print{
   body *{visibility:hidden}
@@ -123,7 +114,6 @@ input:focus,select:focus{outline:3px solid var(--red);outline-offset:-1px}
  .sl-row .tools,.tape,.sl-row .meta,.sl-total,.intro-flag,#slAdd{display:none!important}
 }
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
-
 /* AUTH GATE */
 .auth-gate{position:fixed;inset:0;background:var(--paper);z-index:9999;align-items:center;justify-content:center;padding:20px;display:none;}
 body.locked .auth-gate{display:flex}
@@ -137,7 +127,8 @@ body.locked header,body.locked main{display:none}
 .auth-toggle a{color:var(--red);cursor:pointer;text-decoration:underline;}
 .header-account{font-family:'Oswald',sans-serif;text-transform:uppercase;letter-spacing:1px;font-size:11px;color:var(--khaki);margin-left:14px;}
 .header-account a{color:var(--red);cursor:pointer;text-decoration:underline;}
-
+.pro-badge{font-family:'Oswald',sans-serif;text-transform:uppercase;letter-spacing:1px;font-size:10px;color:var(--red);border:1px solid var(--red);padding:1px 6px;}
+.upgrade-link{color:var(--red);cursor:pointer;text-decoration:underline;font-weight:600;}
 /* PENDING APPROVAL */
 .pending-gate{position:fixed;inset:0;background:var(--paper);z-index:9998;align-items:center;justify-content:center;padding:20px;display:none;}
 body.pending .pending-gate{display:flex}
@@ -151,7 +142,6 @@ body.pending header,body.pending main{display:none}
 </style>
 </head>
 <body class="locked">
-
 <div class="auth-gate" id="authGate">
   <div class="auth-box">
     <h1>Set <span>Gen</span></h1>
@@ -169,7 +159,6 @@ body.pending header,body.pending main{display:none}
     <div class="auth-toggle" id="authToggle">Need an account? <a onclick="setAuthMode('signup')">Sign up</a></div>
   </div>
 </div>
-
 <div class="pending-gate" id="pendingGate">
   <div class="pending-box">
     <h1>Almost <span>There</span></h1>
@@ -180,12 +169,10 @@ body.pending header,body.pending main{display:none}
     </div>
   </div>
 </div>
-
 <header>
   <h1>Set <span>Gen</span></h1>
   <div class="tagline">Blue Amsterdam Studio &bull; Nashville, Tenn.<span class="header-account" id="headerAccount"></span></div>
 </header>
-
 <main>
   <section class="col-left">
    <details class="song-list" id="dbBox" style="margin-top:0">
@@ -285,7 +272,6 @@ body.pending header,body.pending main{display:none}
       <div id="songList"></div>
     </details>
   </section>
-
   <section class="col-right">
     <div class="gen-panel">
       <h2>Build the Set</h2>
@@ -323,12 +309,10 @@ body.pending header,body.pending main{display:none}
       </div>
       <div class="gen-status" id="genStatus"></div>
     </div>
-
     <div class="gen-panel" style="margin-bottom:26px">
       <h2>Saved Sets</h2>
       <div id="savedSetlists"></div>
     </div>
-
     <div class="setlist-card" id="setlistCard">
       <div class="tape"></div>
       <div class="sl-head">
@@ -348,16 +332,13 @@ body.pending header,body.pending main{display:none}
     </div>
   </section>
 </main>
-
 <script>
 const SUPABASE_URL      = 'https://drqprlrsvoaulsfqnmug.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_3TkViJg9X18WLl5Bdn7wxQ_Izid6RqX';
 const { createClient } = supabase;
 const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
 const SETLIST_KEY_BASE = 'setlist-dev-setlist-v1';
 function setlistKey() { return currentUser ? SETLIST_KEY_BASE + '-' + currentUser.id : SETLIST_KEY_BASE + '-anon'; }
-
 /* ── DB ── */
 async function loadSongs() {
   const { data, error } = await db.from('songs').select('*').order('title');
@@ -390,13 +371,11 @@ async function deleteSetlistDb(id) {
 }
 function loadSetlist() { try { return JSON.parse(localStorage.getItem(setlistKey())) || []; } catch { return []; } }
 function saveSetlist(s) { localStorage.setItem(setlistKey(), JSON.stringify(s)); }
-
 /* ── HELPERS ── */
 const $ = id => document.getElementById(id);
-
 /* ── STATE ── */
 let songs = [], setlist = [], savedSetlists = [], editingId = null, currentUser = null;
-
+let subStatus = 'free';
 async function init() {
   const savedPitch = localStorage.getItem(pitchKey());
   const oldHalfDown = localStorage.getItem('setgen-halfdown-' + (currentUser ? currentUser.id : 'anon'));
@@ -406,7 +385,6 @@ async function init() {
   savedSetlists = await loadSavedSetlists();
   renderSongs(); renderMoodFilter(); renderSetlist(); renderSavedSetlists();
 }
-
 /* ── AUTH ── */
 let authMode = 'signin';
 function setAuthMode(mode) {
@@ -417,7 +395,6 @@ function setAuthMode(mode) {
     : 'Already have an account? <a onclick="setAuthMode(\'signin\')">Log in</a>';
   $('authError').textContent = '';
 }
-
 $('authSubmit').addEventListener('click', async () => {
   const email = $('authEmail').value.trim(), password = $('authPassword').value;
   if (!email || !password) { $('authError').textContent = 'Enter an email and password.'; return; }
@@ -434,11 +411,8 @@ $('authSubmit').addEventListener('click', async () => {
     }
   } catch (e) { $('authError').style.color = 'var(--red)'; $('authError').textContent = e.message; }
 });
-
 $('authPassword').addEventListener('keydown', e => { if (e.key === 'Enter') $('authSubmit').click(); });
-
 let resolvedUserId = null;
-
 async function onLogin(user) {
   currentUser = user;
   const { data: profile, error } = await db.from('profiles').select('approved').eq('id', user.id).single();
@@ -451,49 +425,82 @@ async function onLogin(user) {
   document.body.classList.remove('locked', 'pending');
   if (resolvedUserId === user.id) return;
   resolvedUserId = user.id;
-  $('headerAccount').innerHTML = esc(user.email) + ' &bull; <a id="btnLogout">Log Out</a>';
-  $('btnLogout').addEventListener('click', async () => { await db.auth.signOut(); });
+  await loadSubscriptionStatus();
+  renderHeaderAccount();
   await init();
 }
-
 function onLogout() {
   currentUser = null;
   resolvedUserId = null;
+  subStatus = 'free';
   document.body.classList.remove('pending');
   document.body.classList.add('locked');
   $('authEmail').value = ''; $('authPassword').value = '';
 }
-
 $('btnCheckApproval').addEventListener('click', async () => {
   if (currentUser) onLogin(currentUser);
 });
 $('btnPendingLogout').addEventListener('click', async () => { await db.auth.signOut(); });
-
 db.auth.onAuthStateChange((event, session) => {
   if (session && session.user) onLogin(session.user);
   else onLogout();
 });
-
 (async () => {
   const { data: { session } } = await db.auth.getSession();
   if (session && session.user) onLogin(session.user);
   else onLogout();
 })();
+/* ── SUBSCRIPTION / MONETIZATION (Stripe Managed Payments) ──
+   Requires a `subscriptions` table with a stripe_customer_id column
+   (see supabase-migration-stripe.sql) and two Stripe Payment Links
+   created with Managed Payments enabled. Fill in the two URLs below
+   once those exist — copy them straight from the Stripe Dashboard. */
+// TEST MODE links — kept here in case you need to fall back to testing.
+// Monthly: https://buy.stripe.com/test_9B65kF4ZG12Ddox0MD9R601
+// Yearly:  https://buy.stripe.com/test_4gMdRbeAg8v50BL0MD9R600
+const STRIPE_PAYMENT_LINK_MONTHLY = 'https://buy.stripe.com/4gMdRbeAg8v50BL0MD9R600'; // $3.99/mo (LIVE — real charges)
+const STRIPE_PAYMENT_LINK_YEARLY  = 'https://buy.stripe.com/9B65kF4ZG12Ddox0MD9R601';  // $29/yr (LIVE — real charges)
+const FREE_SAVED_SET_LIMIT = 1;
 
+async function loadSubscriptionStatus() {
+  const { data, error } = await db.from('subscriptions').select('status').eq('user_id', currentUser.id).maybeSingle();
+  if (!data && !error) {
+    // First login since subscriptions existed — create their free-tier row.
+    await db.from('subscriptions').insert({ user_id: currentUser.id, status: 'free' });
+    subStatus = 'free';
+  } else {
+    subStatus = data ? data.status : 'free';
+  }
+}
+
+function renderHeaderAccount() {
+  const proBadge = subStatus === 'active'
+    ? '<span class="pro-badge">PRO</span> '
+    : '<a class="upgrade-link" id="btnUpgrade">Upgrade to Pro</a> &bull; ';
+  $('headerAccount').innerHTML = proBadge + esc(currentUser.email) + ' &bull; <a id="btnLogout">Log Out</a>';
+  $('btnLogout').addEventListener('click', async () => { await db.auth.signOut(); });
+  if (subStatus !== 'active') $('btnUpgrade').addEventListener('click', () => goToCheckout());
+}
+
+function goToCheckout(link = STRIPE_PAYMENT_LINK_MONTHLY) {
+  // client_reference_id is how the webhook matches the Stripe customer back
+  // to this Supabase user — Managed Payments still honors this Payment Link param.
+  const url = link +
+    '?client_reference_id=' + encodeURIComponent(currentUser.id) +
+    '&prefilled_email=' + encodeURIComponent(currentUser.email);
+  window.location.href = url;
+}
 const fmt = s => Math.floor(s/60) + ':' + String(s%60).padStart(2,'0');
 const esc = t => t.replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const songById = id => songs.find(s => s.id === id);
 const songTime = (s, ci) => s.len + (ci ? s.intro : 0);
 const status = msg => $('genStatus').textContent = msg;
-
 /* ── KEY / VOICING DISPLAY ── */
 const NOTE_NAMES = ['C','C&#9839;','D','E&#9837;','E','F','F&#9839;','G','A&#9837;','A','B&#9837;','B'];
 const SHAPE_ROOTS = { A:9, C:0, D:2, E:4, G:7 };
 const OPEN_ROOTS  = { 'Open B':11, 'Open D':2, 'Open E':4, 'Open G':7 };
-
 function pitchKey() { return 'setgen-pitch-' + (currentUser ? currentUser.id : 'anon'); }
 function pitchOffset() { return parseInt($('gPitch').value, 10) || 0; }
-
 function keyDisplayHTML(s) {
   const cap  = parseInt(s.capo, 10) || 0;     // capo as entered (standard pitch)
   const disp = cap - pitchOffset();           // compensated capo at current tuning
@@ -502,7 +509,6 @@ function keyDisplayHTML(s) {
   const concertFrom = root => NOTE_NAMES[(((root + cap) % 12) + 12) % 12];
   const showConcert = cap !== 0 || disp !== 0;
   let stage = '', concert = '';
-
   if (OPEN_ROOTS[tun] !== undefined) {
     stage = tun + sup(disp);
     if (showConcert) concert = concertFrom(OPEN_ROOTS[tun]);
@@ -516,12 +522,10 @@ function keyDisplayHTML(s) {
   }
   return '(' + stage + (concert ? ' &middot; ' + concert : '') + ')';
 }
-
 $('gPitch').addEventListener('change', () => {
   localStorage.setItem(pitchKey(), $('gPitch').value);
   renderSongs(); renderSetlist();
 });
-
 function segInit(id, def) {
   $(id).querySelectorAll('button').forEach(b => {
     b.addEventListener('click', () => { $(id).querySelectorAll('button').forEach(x => x.classList.remove('on')); b.classList.add('on'); });
@@ -531,7 +535,6 @@ function segInit(id, def) {
 function segSet(id, v) { $(id).querySelectorAll('button').forEach(b => b.classList.toggle('on', b.dataset.v === v)); }
 function segGet(id) { const on = $(id).querySelector('button.on'); return on ? on.dataset.v : null; }
 segInit('fTempo','up'); segInit('fType','original');
-
 /* ── SONG CRUD ── */
 $('btnSave').addEventListener('click', async () => {
   const title = $('fTitle').value.trim();
@@ -550,9 +553,7 @@ $('btnSave').addEventListener('click', async () => {
     resetForm(); renderSongs(); renderMoodFilter(); renderSetlist();
   } catch(e) { status('Error saving: ' + e.message); }
 });
-
 $('btnCancel').addEventListener('click', resetForm);
-
 function resetForm() {
   editingId = null;
   $('fTitle').value=''; $('fMin').value=''; $('fSec').value=''; $('fMood').value='';
@@ -561,7 +562,6 @@ function resetForm() {
   segSet('fTempo','up'); segSet('fType','original');
   $('btnSave').textContent='Add Song'; $('btnCancel').style.display='none';
 }
-
 function editSong(id) {
   const s = songById(id); if (!s) return;
   editingId = id;
@@ -572,7 +572,6 @@ function editSong(id) {
   $('btnSave').textContent='Save Changes'; $('btnCancel').style.display='inline-block';
   $('fTitle').focus();
 }
-
 async function deleteSong(id) {
   const s = songById(id);
   if (!confirm('Delete "' + (s?s.title:'this song') + '"?')) return;
@@ -583,7 +582,6 @@ async function deleteSong(id) {
     saveSetlist(setlist); renderSongs(); renderMoodFilter(); renderSetlist();
   } catch(e) { status('Error deleting: ' + e.message); }
 }
-
 function renderSongs() {
   $('songCount').textContent = songs.length ? songs.length + ' songs' : '';
   const el = $('songList');
@@ -599,31 +597,25 @@ function renderSongs() {
     '</div>'
   ).join('');
 }
-
 function renderMoodFilter() {
   const moods = [...new Set(songs.map(s=>s.mood).filter(Boolean))].sort();
   const sel=$('gMood'), cur=sel.value;
   sel.innerHTML='<option value="">All moods</option>'+moods.map(m=>'<option value="'+esc(m)+'">'+esc(m)+'</option>').join('');
   sel.value=(cur&&moods.includes(cur))?cur:'';
 }
-
 /* ── GENERATOR ── */
 function shuffle(a) { for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; }
-
 $('btnGenerate').addEventListener('click', () => {
   const target = (parseInt($('gTarget').value)||45)*60;
   const ci = $('gIntros').checked;
   const mood = $('gMood').value;
   const nOrig = $('gOriginals').value !== '' ? parseInt($('gOriginals').value) : null;
   const nCov  = $('gCovers').value    !== '' ? parseInt($('gCovers').value)    : null;
-
   const poolAll  = songs.filter(s => !mood || s.mood===mood);
   const poolOrig = poolAll.filter(s => s.type==='original');
   const poolCov  = poolAll.filter(s => s.type==='cover');
-
   if (nOrig!==null && poolOrig.length<nOrig) { status('Not enough originals (have '+poolOrig.length+', need '+nOrig+').'); return; }
   if (nCov !==null && poolCov.length <nCov)  { status('Not enough covers (have '+poolCov.length+', need '+nCov+').'); return; }
-
   // Staples are forced in — EXCEPT for a type with an explicit count, which acts
   // as a hard cap. Staples of a capped type stop being auto-locked and instead
   // become priority candidates (preferred first) that never exceed the count.
@@ -635,22 +627,18 @@ $('btnGenerate').addEventListener('click', () => {
   const lockedIds = new Set([...locked.map(x=>x.songId), ...staples.map(s=>s.id)]);
   const lockedAll = [...locked, ...staples.filter(s=>!locked.find(x=>x.songId===s.id)).map(s=>({songId:s.id,locked:true}))];
   let best=null, bestDiff=Infinity;
-
   for (let attempt=0; attempt<400; attempt++) {
     let list  = lockedAll.map(x=>songById(x.songId)).filter(Boolean);
     let total = list.reduce((t,s)=>t+songTime(s,ci),0);
     const lOrig = list.filter(s=>s.type==='original').length;
     const lCov  = list.filter(s=>s.type==='cover').length;
-
     const byStaple = a => a.sort((x,y)=>(stapleIds.has(y.id)?1:0)-(stapleIds.has(x.id)?1:0));
     const aOrig = byStaple(shuffle(poolOrig.filter(s=>!lockedIds.has(s.id))));
     const aCov  = byStaple(shuffle(poolCov.filter(s=>!lockedIds.has(s.id))));
-
     let picks = [];
     if (nOrig!==null) { const need=nOrig-lOrig; if(need>aOrig.length) continue; if(need>0) picks.push(...aOrig.slice(0,need)); }
     if (nCov !==null) { const need=nCov -lCov;  if(need>aCov.length)  continue; if(need>0) picks.push(...aCov.slice(0,need));  }
     for (const s of picks) { total+=songTime(s,ci); list.push(s); }
-
     const usedIds = new Set([...lockedIds, ...picks.map(s=>s.id)]);
     const filler  = shuffle(poolAll.filter(s => {
       if (usedIds.has(s.id)) return false;
@@ -669,14 +657,12 @@ $('btnGenerate').addEventListener('click', () => {
     if (diff<bestDiff) { bestDiff=diff; best={list,total}; }
     if (bestDiff<=45) break;
   }
-
   if (!best) { status('Could not build a set — try loosening the rules.'); return; }
   setlist = best.list.map(s=>({songId:s.id, locked: locked.some(x=>x.songId===s.id)}));
   saveSetlist(setlist); renderSetlist();
   const oc=best.list.filter(s=>s.type==='original').length, cc=best.list.filter(s=>s.type==='cover').length;
   status('Set built: '+best.list.length+' songs ('+oc+' orig / '+cc+' covers), '+fmt(best.total)+' against a '+fmt(target)+' target.');
 });
-
 function arrangeSet(list) {
   const openUp=$('gOpenUp').checked, closeUp=$('gCloseUp').checked, noBB=$('gNoBB').checked;
   let arr=shuffle(list.slice());
@@ -690,7 +676,6 @@ function arrangeSet(list) {
   }
   return list;
 }
-
 /* ── SETLIST RENDER ── */
 function renderSetlist() {
   renderAddPicker();
@@ -699,7 +684,7 @@ function renderSetlist() {
   const items=setlist.map(x=>songById(x.songId)).filter(Boolean);
   if (!items.length) { $('slSub').textContent='Hit Generate to build a set'; $('slTune').style.display='none'; rows.innerHTML=''; $('slTotal').style.display='none'; return; }
   const date=$('gDate').value.trim();
-  $('slSub').textContent=(date?date+' \u2022 ':'')+'Mason Douglas';
+  $('slSub').textContent=(date?date+' • ':'')+'Mason Douglas';
   const tuneLabel=$('gPitch').selectedOptions[0].textContent;
   $('slTune').textContent='Guitar: '+tuneLabel;
   $('slTune').className='sub tune'+(pitchOffset()!==0?' alt':'');
@@ -727,7 +712,6 @@ function renderSetlist() {
   clock.textContent=fmt(total);
   clock.classList.toggle('over',total>target+60);
 }
-
 function moveRow(i,d){const j=i+d;if(j<0||j>=setlist.length)return;[setlist[i],setlist[j]]=[setlist[j],setlist[i]];saveSetlist(setlist);renderSetlist();}
 function toggleLock(i){setlist[i].locked=!setlist[i].locked;saveSetlist(setlist);renderSetlist();}
 function removeRow(i){setlist.splice(i,1);saveSetlist(setlist);renderSetlist();}
@@ -757,10 +741,13 @@ function swapRow(i){
   saveSetlist(setlist);renderSetlist();
 }
 ['gTarget','gIntros','gShow','gDate'].forEach(id=>$(id).addEventListener('input',renderSetlist));
-
 /* ── SAVE / LOAD SETS ── */
 $('btnSaveSet').addEventListener('click', async () => {
   if (!setlist.filter(x=>songById(x.songId)).length) { status('Generate a set first.'); return; }
+  if (subStatus !== 'active' && savedSetlists.length >= FREE_SAVED_SET_LIMIT) {
+    if (confirm('Free plan is limited to ' + FREE_SAVED_SET_LIMIT + ' saved set. Upgrade to Pro ($3.99/mo or $29/yr) for unlimited saved sets?')) goToCheckout();
+    return;
+  }
   const name=prompt('Name this set list:');
   if (!name||!name.trim()) return;
   try {
@@ -768,7 +755,6 @@ $('btnSaveSet').addEventListener('click', async () => {
     savedSetlists=[record,...savedSetlists]; renderSavedSetlists(); status('Saved: '+name.trim());
   } catch(e){status('Error saving: '+e.message);}
 });
-
 function renderSavedSetlists() {
   const el=$('savedSetlists');
   if(!savedSetlists.length){el.innerHTML='<div class="empty-note">No saved sets yet.</div>';return;}
@@ -781,7 +767,6 @@ function renderSavedSetlists() {
     '</div>'
   ).join('');
 }
-
 function loadSavedSet(id) {
   const sl=savedSetlists.find(x=>x.id===id); if(!sl) return;
   try {
@@ -791,18 +776,25 @@ function loadSavedSet(id) {
     renderSetlist(); status('Loaded: '+sl.name);
   } catch(e){status('Error loading: '+e.message);}
 }
-
 async function deleteSavedSet(id) {
   const sl=savedSetlists.find(x=>x.id===id);
   if(!confirm('Delete "'+( sl?sl.name:'')+'"?')) return;
   try { await deleteSetlistDb(id); savedSetlists=savedSetlists.filter(x=>x.id!==id); renderSavedSetlists(); }
   catch(e){status('Error: '+e.message);}
 }
-
 /* ── EXPORT ── */
-$('btnPrint').addEventListener('click',()=>window.print());
-
+$('btnPrint').addEventListener('click',()=>{
+  if (subStatus !== 'active') {
+    if (confirm('Print/export is a Pro feature ($3.99/mo or $29/yr). Upgrade now?')) goToCheckout();
+    return;
+  }
+  window.print();
+});
 $('btnWord').addEventListener('click',()=>{
+  if (subStatus !== 'active') {
+    if (confirm('Word export is a Pro feature ($3.99/mo or $29/yr). Upgrade now?')) goToCheckout();
+    return;
+  }
   const items=setlist.map(x=>songById(x.songId)).filter(Boolean);
   if(!items.length){status('Generate a set first.');return;}
   const show=esc($('gShow').value.trim()||'Set List'), date=esc($('gDate').value.trim());
@@ -815,17 +807,15 @@ $('btnWord').addEventListener('click',()=>{
     '<span style="font-size:11pt;letter-spacing:2pt;color:#555;">'+(date?date+' &bull; ':'')+'MASON DOUGLAS</span><br>' +
     '<span style="font-size:10pt;letter-spacing:2pt;color:'+(pitchOffset()!==0?'#A8231B':'#555')+';font-weight:bold;">GUITAR: '+$('gPitch').selectedOptions[0].textContent.toUpperCase()+'</span></div>' +
     '<table style="width:100%;border-collapse:collapse;">'+rows+'</table></body></html>';
-  const blob=new Blob(['\ufeff'+html],{type:'application/msword'});
+  const blob=new Blob(['﻿'+html],{type:'application/msword'});
   const a=document.createElement('a');
   a.href=URL.createObjectURL(blob); a.download=(show.replace(/[^a-z0-9]+/gi,'-')||'set-list')+'.doc'; a.click();
 URL.revokeObjectURL(a.href);
 });
-
 $('btnClearSet').addEventListener('click',()=>{
   if(setlist.filter(x=>songById(x.songId)).length && !confirm('Clear the current set? This empties the working setlist. Saved sets are not affected.')) return;
   setlist=[]; saveSetlist(setlist); renderSetlist(); status('Set cleared.');
 });
-
 </script>
 <script>
   if (window.matchMedia("(min-width: 901px)").matches) {
