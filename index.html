@@ -20,6 +20,7 @@
   --red:#A8231B;
   --khaki:#8A7A55;
   --line:#C9B98F;
+  --gold:#C9A227;
 }
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:var(--paper);color:var(--ink);font-family:'Libre Franklin',sans-serif;font-size:15px;line-height:1.5;}
@@ -53,8 +54,11 @@ input:focus,select:focus{outline:3px solid var(--red);outline-offset:-1px}
 .btn.ghost:hover{background:var(--ink);color:var(--paper)}
 .btn.red{background:var(--red);border-color:var(--red)}
 .btn.red:hover{background:var(--ink);border-color:var(--ink)}
+.btn.gold{background:var(--gold);border-color:#8A6D1E;color:var(--ink);}
+.btn.gold:hover{background:#E0BB3E;border-color:#8A6D1E}
 .btn.small{padding:5px 10px;font-size:11px;letter-spacing:1.5px}
 .btn-row{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap}
+.perfect-set-caption{font-size:11px;color:var(--khaki);font-style:italic;margin-top:6px;width:100%}
 /* SONG LIST */
 .song-list{margin-top:26px}
   .song-list summary{font-family:'Oswald',sans-serif;text-transform:uppercase;letter-spacing:2.5px;font-size:14px;font-weight:600;border-bottom:2px solid var(--ink);padding-bottom:6px;margin-bottom:14px;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:baseline;}
@@ -97,6 +101,9 @@ input:focus,select:focus{outline:3px solid var(--red);outline-offset:-1px}
 .sl-row .meta{font-family:'Oswald',sans-serif;font-size:12px;letter-spacing:1px;color:var(--khaki);text-transform:uppercase;white-space:nowrap}
 .sl-row .tools{display:flex;gap:2px;flex-shrink:0}
 .sl-row.locked{background:rgba(168,35,27,.06)}
+.sl-break{display:flex;align-items:center;gap:10px;margin:16px 0;font-family:'Oswald',sans-serif;text-transform:uppercase;letter-spacing:3px;font-size:11px;color:var(--khaki);font-weight:600;}
+.sl-break::before,.sl-break::after{content:"";flex:1;border-top:2px solid var(--khaki)}
+.sl-break .mini{margin-left:6px}
 .sl-total{display:flex;justify-content:space-between;align-items:baseline;padding-top:14px;font-family:'Oswald',sans-serif;text-transform:uppercase;letter-spacing:2px;font-size:13px;}
 .sl-total .clock{font-family:'Alfa Slab One',serif;font-size:26px;letter-spacing:1px}
 .sl-total .clock.over{color:var(--red)}
@@ -114,7 +121,7 @@ input:focus,select:focus{outline:3px solid var(--red);outline-offset:-1px}
   body *{visibility:hidden}
   .setlist-card,.setlist-card *{visibility:visible}
   .setlist-card{position:absolute;top:0;left:0;width:100%;box-shadow:none;border:none}
- .sl-row .tools,.tape,.sl-row .meta,.sl-total,.intro-flag,#slAdd{display:none!important}
+ .sl-row .tools,.tape,.sl-row .meta,.sl-total,.intro-flag,#slAdd,.sl-break .mini{display:none!important}
 }
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
 /* AUTH GATE */
@@ -305,11 +312,13 @@ body.pending header,body.pending main{display:none}
       </div>
       <div class="btn-row">
        <button class="btn red" id="btnGenerate">Generate Set List</button>
+        <button class="btn gold" id="btnPerfectSet">&#11088; The Perfect Set</button>
         <button class="btn ghost" id="btnClearSet">Clear Set</button>
         <button class="btn ghost" id="btnSaveSet">Save Set</button>
         <button class="btn ghost" id="btnPrint">Print</button>
         <button class="btn ghost" id="btnWord">Download for Word</button>
       </div>
+      <div class="perfect-set-caption">This is the perfect setlist based on Tom Jackson's proven flow.</div>
       <div class="gen-status" id="genStatus"></div>
     </div>
     <div class="gen-panel" style="margin-bottom:26px">
@@ -679,6 +688,117 @@ function arrangeSet(list) {
   }
   return list;
 }
+
+/* ── PERFECT SET (Tom Jackson flow) ── */
+// Proportional positions through a set, scaled to any length: opener, keep-moving,
+// best-hitter, two power-hitter/anthem slots, the emotional pivot (two down-tempo
+// songs back to back on purpose), the setup, and the finale.
+const GOLDEN_BEATS = [
+  {frac:0.000, want:['up'],          staple:true},
+  {frac:0.125, want:['up','mid']},
+  {frac:0.250, want:['mid','up'],    staple:true},
+  {frac:0.375, want:['up'],          staple:true},
+  {frac:0.500, want:['up'],          staple:true},
+  {frac:0.625, want:['down','mid']},
+  {frac:0.750, want:['down','mid']},
+  {frac:0.875, want:['mid','up']},
+  {frac:1.000, want:['up'],          staple:true}
+];
+
+function buildGoldenChunk(poolAll, usedGlobal, targetSec, ci, wantOrig, wantCov) {
+  const localUsed = new Set();
+  const isAvail = s => !usedGlobal.has(s.id) && !localUsed.has(s.id);
+  let origCount=0, covCount=0;
+  function typeScore(s) {
+    if (wantOrig==null && wantCov==null) return 0;
+    const origRoom = wantOrig==null ? Infinity : (wantOrig - origCount);
+    const covRoom  = wantCov ==null ? Infinity : (wantCov  - covCount);
+    return s.type==='original' ? -origRoom : -covRoom;
+  }
+  function claim(s){ localUsed.add(s.id); if(s.type==='original') origCount++; else covCount++; }
+
+  function pickForBeat(beat) {
+    for (const tempo of beat.want) {
+      let cands = poolAll.filter(s => isAvail(s) && s.tempo===tempo);
+      if (!cands.length) continue;
+      if (beat.staple) { const st=cands.filter(s=>s.staple); if (st.length) cands=st; }
+      cands = shuffle(cands.slice()).sort((a,b)=>typeScore(a)-typeScore(b));
+      return cands[0];
+    }
+    let any = poolAll.filter(isAvail);
+    if (!any.length) return null;
+    any = shuffle(any.slice()).sort((a,b)=>typeScore(a)-typeScore(b));
+    return any[0];
+  }
+
+  const anchors = GOLDEN_BEATS.map(beat => {
+    const s = pickForBeat(beat);
+    if (s) claim(s);
+    return { beat, song: s };
+  }).filter(a => a.song);
+  if (!anchors.length) return { list:[], total:0 };
+
+  function pickFiller(prevTempo) {
+    let cands = poolAll.filter(isAvail);
+    if (prevTempo==='down') { const nd=cands.filter(s=>s.tempo!=='down'); if (nd.length) cands=nd; }
+    if (!cands.length) return null;
+    cands = shuffle(cands.slice()).sort((a,b)=>typeScore(a)-typeScore(b));
+    return cands[0];
+  }
+
+  const list=[]; let elapsed=0, prevTempo=null;
+  anchors.forEach((a, idx) => {
+    const targetElapsed = a.beat.frac * targetSec;
+    if (idx>0) {
+      let guard=0;
+      while (elapsed < targetElapsed - 30 && guard<30) {
+        const f = pickFiller(prevTempo);
+        if (!f) break;
+        const t = songTime(f, ci);
+        if (elapsed + t > targetElapsed + 90) break;
+        claim(f); list.push(f); elapsed+=t; prevTempo=f.tempo; guard++;
+      }
+    }
+    list.push(a.song); elapsed+=songTime(a.song,ci); prevTempo=a.song.tempo;
+  });
+  return { list, total: elapsed };
+}
+
+function splitCount(total, parts) {
+  if (total==null) return new Array(parts).fill(null);
+  const base=Math.floor(total/parts); let rem=total-base*parts;
+  return Array.from({length:parts},(_,i)=>base+(i<rem?1:0));
+}
+
+$('btnPerfectSet').addEventListener('click', () => {
+  const targetTotalSec=(parseInt($('gTarget').value)||45)*60;
+  const ci=$('gIntros').checked;
+  const mood=$('gMood').value;
+  const nOrig=$('gOriginals').value!==''?parseInt($('gOriginals').value):null;
+  const nCov =$('gCovers').value !==''?parseInt($('gCovers').value) :null;
+  const poolAll=songs.filter(s=>!mood||s.mood===mood);
+  if (poolAll.length<2) { status('Need at least a couple songs in the catalog (matching your mood filter) to build a Perfect Set.'); return; }
+
+  const IDEAL_CHUNK=55*60;
+  const chunkCount=Math.max(1, Math.round(targetTotalSec/IDEAL_CHUNK));
+  const chunkTarget=targetTotalSec/chunkCount;
+  const origPerChunk=splitCount(nOrig,chunkCount), covPerChunk=splitCount(nCov,chunkCount);
+
+  const used=new Set(), result=[]; let totalRun=0, shortfall=false;
+  for (let c=0;c<chunkCount;c++) {
+    if (c>0) result.push({break:true, label:'SET BREAK \u2014 Set '+(c+1)});
+    const chunk=buildGoldenChunk(poolAll, used, chunkTarget, ci, origPerChunk[c], covPerChunk[c]);
+    if (!chunk.list.length) { shortfall=true; continue; }
+    chunk.list.forEach(s=>{ result.push({songId:s.id, locked:false}); used.add(s.id); });
+    totalRun+=chunk.total;
+  }
+  if (!result.some(x=>x.songId)) { status('Could not build a Perfect Set — not enough songs match your filters.'); return; }
+
+  setlist=result; saveSetlist(setlist); renderSetlist();
+  const setLabel = chunkCount>1 ? chunkCount+' sets, ' : '';
+  status('\u2b50 Perfect Set built: '+setLabel+fmt(totalRun)+' against a '+fmt(targetTotalSec)+' target, following Tom Jackson\u2019s flow.'+(shortfall?' (Catalog ran short for at least one set.)':''));
+});
+
 /* ── SETLIST RENDER ── */
 function renderSetlist() {
   renderAddPicker();
@@ -692,12 +812,13 @@ function renderSetlist() {
   $('slTune').textContent='Guitar: '+tuneLabel;
   $('slTune').className='sub tune'+(pitchOffset()!==0?' alt':'');
   $('slTune').style.display='';
-  let total=0;
+  let total=0, num=0;
   rows.innerHTML=setlist.map((x,i)=>{
+    if (x.break) { return '<div class="sl-break">'+esc(x.label||'SET BREAK')+'<button class="mini" onclick="removeRow('+i+')">&#10005;</button></div>'; }
     const s=songById(x.songId); if(!s) return '';
-    total+=songTime(s,ci);
+    total+=songTime(s,ci); num++;
     return '<div class="sl-row '+(x.locked?'locked':'')+'">' +
-      '<span class="num">'+(i+1)+'</span>' +
+      '<span class="num">'+num+'</span>' +
     '<span class="name">'+esc(s.title)+(s.staple?' <span class="staple-star">&#9733;</span>':'')+(keyDisplayHTML(s)?' <span class="key-tag">'+keyDisplayHTML(s)+'</span>':'')+(s.intro?'<span class="intro-flag">'+fmt(s.intro)+' intro</span>':'')+'</span>' +
       '<span class="meta arrow-'+s.tempo+'">'+fmt(s.len)+(s.type==='cover'?' &bull; cover':'')+'</span>' +
       '<span class="tools">' +
@@ -801,8 +922,11 @@ $('btnWord').addEventListener('click',()=>{
   const items=setlist.map(x=>songById(x.songId)).filter(Boolean);
   if(!items.length){status('Generate a set first.');return;}
   const show=esc($('gShow').value.trim()||'Set List'), date=esc($('gDate').value.trim());
-  const rows=items.map((s,i)=>{
-    return '<tr><td style="font-size:16pt;color:#A8231B;font-weight:bold;padding:8pt 10pt 8pt 0;vertical-align:top;">'+(i+1)+'.</td>' +
+  let num=0;
+  const rows=setlist.map(x=>{
+    if (x.break) return '<tr><td colspan="2" style="padding:14pt 0 10pt;text-align:center;font-size:11pt;letter-spacing:2pt;color:#8A7A55;font-family:Arial,sans-serif;font-weight:bold;border-top:2pt solid #000;border-bottom:2pt solid #000;">'+esc(x.label||'SET BREAK')+'</td></tr>';
+    const s=songById(x.songId); if(!s) return ''; num++;
+    return '<tr><td style="font-size:16pt;color:#A8231B;font-weight:bold;padding:8pt 10pt 8pt 0;vertical-align:top;">'+num+'.</td>' +
       '<td style="font-size:20pt;font-weight:bold;text-transform:uppercase;padding:8pt 0;border-bottom:1pt dashed #999;">'+esc(s.title)+(s.staple?' <span style="color:#A8231B;font-size:15pt;">&#9733;</span>':'')+(keyDisplayHTML(s)?' <span style="font-size:14pt;color:#A8231B;text-transform:none;">'+keyDisplayHTML(s)+'</span>':'')+'</td></tr>';
   }).join('');
   const html='<!DOCTYPE html><html><head><meta charset="utf-8"><title>'+show+'</title></head><body style="font-family:Arial Black,Arial,sans-serif;">' +
