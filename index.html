@@ -691,15 +691,15 @@ function arrangeSet(list) {
 
 /* ── PERFECT SET (Tom Jackson flow) ── */
 // Proportional positions through a set, scaled to any length: opener, keep-moving,
-// best-hitter, two power-hitter/anthem slots, the emotional pivot (two down-tempo
-// songs back to back on purpose), the setup, and the finale.
+// best-hitter, two power-hitter/anthem slots, a single emotional pivot (the one
+// ballad/acoustic moment — never doubled up), the setup, and the finale.
 const GOLDEN_BEATS = [
   {frac:0.000, want:['up'],          staple:true},
   {frac:0.125, want:['up','mid']},
   {frac:0.250, want:['mid','up'],    staple:true},
   {frac:0.375, want:['up'],          staple:true},
   {frac:0.500, want:['up'],          staple:true},
-  {frac:0.625, want:['down','mid']},
+  {frac:0.625, want:['mid','up']},
   {frac:0.750, want:['down','mid']},
   {frac:0.875, want:['mid','up']},
   {frac:1.000, want:['up'],          staple:true}
@@ -739,8 +739,8 @@ function buildGoldenChunk(poolAll, usedGlobal, targetSec, ci, wantOrig, wantCov)
   if (!anchors.length) return { list:[], total:0 };
 
   function pickFiller(prevTempo) {
-    let cands = poolAll.filter(isAvail);
-    if (prevTempo==='down') { const nd=cands.filter(s=>s.tempo!=='down'); if (nd.length) cands=nd; }
+    let cands = poolAll.filter(s => isAvail(s) && s.tempo!=='down');
+    if (!cands.length) cands = poolAll.filter(isAvail);
     if (!cands.length) return null;
     cands = shuffle(cands.slice()).sort((a,b)=>typeScore(a)-typeScore(b));
     return cands[0];
