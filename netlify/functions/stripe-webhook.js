@@ -1,6 +1,13 @@
 const Stripe = require('stripe');
 const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 
+// Only Set Gen's own prices count here ($3.99/mo and $29.99/yr).
+const SET_GEN_PRICES = new Set([
+  'price_1U2GNxRru8MEHEIAbh36WqnR',
+  'price_1U2GOiRru8MEHEIAWs9AcQr6',
+]);
+const isSetGenSub = sub => (sub.items?.data || []).some(i => SET_GEN_PRICES.has(i.price?.id));
+
 async function patchSubscription(filter, fields) {
   const res = await fetch(`${process.env.SUPABASE_URL}/rest/v1/subscriptions?${filter}`, {
     method: 'PATCH',
@@ -37,6 +44,8 @@ exports.handler = async function (event) {
       const userId = session.client_reference_id;
       const customerId = session.customer;
       if (!userId) break;
+      const items = await stripe.checkout.sessions.listLineItems(session.id, { limit: 10 });
+      if (!items.data.some(i => SET_GEN_PRICES.has(i.price?.id))) break;
       await patchSubscription(`user_id=eq.${userId}`, {
         status: 'active',
         stripe_customer_id: customerId,
@@ -46,6 +55,7 @@ exports.handler = async function (event) {
 
     case 'customer.subscription.updated': {
       const sub = stripeEvent.data.object;
+      if (!isSetGenSub(sub)) break;
       let status = 'free';
       if (['active', 'trialing'].includes(sub.status)) status = 'active';
       else if (['past_due', 'unpaid'].includes(sub.status)) status = 'past_due';
@@ -56,6 +66,7 @@ exports.handler = async function (event) {
 
     case 'customer.subscription.deleted': {
       const sub = stripeEvent.data.object;
+      if (!isSetGenSub(sub)) break;
       await patchSubscription(`stripe_customer_id=eq.${sub.customer}`, { status: 'cancelled' });
       break;
     }
