@@ -538,7 +538,12 @@ $('authPassword').addEventListener('keydown', e => { if (e.key === 'Enter') $('a
 let resolvedUserId = null;
 async function onLogin(user) {
   currentUser = user;
-  const { data: profile, error } = await db.from('profiles').select('approved').eq('id', user.id).single();
+  let { data: profile, error } = await db.from('profiles').select('approved').eq('id', user.id).maybeSingle();
+  if (!error && !profile) {
+    // First login to Set Gen: create a pending profile row (you approve it in the table).
+    const ins = await db.from('profiles').insert({ id: user.id, email: user.email, approved: false });
+    if (!ins.error) profile = { approved: false };
+  }
   if (error || !profile || !profile.approved) {
     resolvedUserId = null;
     document.body.classList.remove('locked');
