@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="manifest" href="/manifest.json">
 <meta name="theme-color" content="#1A1714">
+<link rel="icon" type="image/png" href="/logo.png">
 <link rel="apple-touch-icon" href="/icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -25,7 +26,7 @@
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:var(--paper);color:var(--ink);font-family:'Libre Franklin',sans-serif;font-size:15px;line-height:1.5;}
 /* HEADER */
-header{border-bottom:6px double var(--ink);padding:26px 28px 18px;display:flex;align-items:baseline;justify-content:space-between;flex-wrap:wrap;gap:8px;}
+header{border-bottom:6px double var(--ink);padding:12px 28px 10px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;}
 header h1{font-family:'Alfa Slab One',serif;font-size:clamp(26px,4vw,42px);letter-spacing:.5px;text-transform:uppercase;line-height:1;}
 header h1 span{color:var(--red)}
 .tagline{font-family:'Oswald',sans-serif;text-transform:uppercase;letter-spacing:3px;font-size:12px;color:var(--khaki);}
@@ -149,6 +150,9 @@ body.pending header,body.pending main{display:none}
 .pending-box p{font-size:14px;margin:18px 0;color:var(--ink);}
 .pending-box .btn-row{justify-content:center}
 
+/* LOGO */
+.logo-img{display:block;height:84px;width:84px}
+.auth-logo{height:170px;width:170px;margin:-14px auto 0}
 /* LEGAL LINKS */
 .legal-note{text-align:center;margin-top:14px;font-size:12px;color:var(--khaki)}
 .legal-note a{color:var(--red);text-decoration:underline}
@@ -205,7 +209,7 @@ body.locked .app-footer,body.pending .app-footer{display:none}
 <body class="locked">
 <div class="auth-gate" id="authGate">
   <div class="auth-box">
-    <h1>Set <span>Gen</span></h1>
+    <h1><img class="logo-img auth-logo" src="/logo.png" alt="Set Gen"></h1>
     <div class="auth-tagline">Blue Amsterdam Studio &bull; Nashville, Tenn.</div>
     <form id="authForm" onsubmit="return false;">
       <label for="authEmail">Email</label>
@@ -233,7 +237,7 @@ body.locked .app-footer,body.pending .app-footer{display:none}
   </div>
 </div>
 <header>
-  <h1>Set <span>Gen</span></h1>
+  <h1><img class="logo-img" src="/logo.png" alt="Set Gen"></h1>
   <div class="tagline">Blue Amsterdam Studio &bull; Nashville, Tenn.<span class="header-account" id="headerAccount"></span> <button type="button" class="btn ghost btn-help" id="btnHelp">Help</button></div>
 </header>
 <main>
