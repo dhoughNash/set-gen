@@ -587,7 +587,7 @@ db.auth.onAuthStateChange((event, session) => {
 // Monthly: https://buy.stripe.com/test_9B65kF4ZG12Ddox0MD9R601
 // Yearly:  https://buy.stripe.com/test_4gMdRbeAg8v50BL0MD9R600
 const STRIPE_PAYMENT_LINK_MONTHLY = 'https://buy.stripe.com/4gMdRbeAg8v50BL0MD9R600'; // $3.99/mo (LIVE — real charges)
-const STRIPE_PAYMENT_LINK_YEARLY  = 'https://buy.stripe.com/9B65kF4ZG12Ddox0MD9R601';  // $29/yr (LIVE — real charges)
+const STRIPE_PAYMENT_LINK_YEARLY  = 'https://buy.stripe.com/9B65kF4ZG12Ddox0MD9R601';  // $29.99/yr (LIVE — real charges)
 const FREE_SAVED_SET_LIMIT = 1;
 
 async function loadSubscriptionStatus() {
@@ -985,7 +985,7 @@ function swapRow(i){
 $('btnSaveSet').addEventListener('click', async () => {
   if (!setlist.filter(x=>songById(x.songId)).length) { status('Generate a set first.'); return; }
   if (subStatus !== 'active' && savedSetlists.length >= FREE_SAVED_SET_LIMIT) {
-    if (confirm('Free plan is limited to ' + FREE_SAVED_SET_LIMIT + ' saved set. Upgrade to Pro ($3.99/mo or $29/yr) for unlimited saved sets?')) goToCheckout();
+    if (confirm('Free plan is limited to ' + FREE_SAVED_SET_LIMIT + ' saved set. Upgrade to Pro ($3.99/mo or $29.99/yr) for unlimited saved sets?')) goToCheckout();
     return;
   }
   const name=prompt('Name this set list:');
@@ -1025,14 +1025,14 @@ async function deleteSavedSet(id) {
 /* ── EXPORT ── */
 $('btnPrint').addEventListener('click',()=>{
   if (subStatus !== 'active') {
-    if (confirm('Print/export is a Pro feature ($3.99/mo or $29/yr). Upgrade now?')) goToCheckout();
+    if (confirm('Print/export is a Pro feature ($3.99/mo or $29.99/yr). Upgrade now?')) goToCheckout();
     return;
   }
   window.print();
 });
 $('btnWord').addEventListener('click',()=>{
   if (subStatus !== 'active') {
-    if (confirm('Word export is a Pro feature ($3.99/mo or $29/yr). Upgrade now?')) goToCheckout();
+    if (confirm('Word export is a Pro feature ($3.99/mo or $29.99/yr). Upgrade now?')) goToCheckout();
     return;
   }
   const items=setlist.map(x=>songById(x.songId)).filter(Boolean);
