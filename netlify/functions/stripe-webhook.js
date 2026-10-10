@@ -8,6 +8,8 @@ async function patchSubscription(filter, fields) {
       apikey: process.env.SUPABASE_SERVICE_ROLE_KEY,
       Authorization: `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}`,
       'Content-Type': 'application/json',
+      'Content-Profile': 'setgen',
+      'Accept-Profile': 'setgen',
       Prefer: 'return=minimal',
     },
     body: JSON.stringify({ ...fields, updated_at: new Date().toISOString() }),
