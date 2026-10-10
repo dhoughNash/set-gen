@@ -456,10 +456,10 @@ body.pending header,body.pending main{display:none}
   </div>
 </div>
 <script>
-const SUPABASE_URL      = 'https://drqprlrsvoaulsfqnmug.supabase.co';
-const SUPABASE_ANON_KEY = 'sb_publishable_3TkViJg9X18WLl5Bdn7wxQ_Izid6RqX';
+const SUPABASE_URL      = 'https://ydxriywpkkdptwcuqaaj.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlkeHJpeXdwa2tkcHR3Y3VxYWFqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg1Njc5NjYsImV4cCI6MjA5NDE0Mzk2Nn0.SYACMatBKKEZV0Wo3rJ6iPSzt0E14qXjT2DieUsG9Zk';
 const { createClient } = supabase;
-const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const db = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, { db: { schema: 'setgen' } });
 const SETLIST_KEY_BASE = 'setlist-dev-setlist-v1';
 function setlistKey() { return currentUser ? SETLIST_KEY_BASE + '-' + currentUser.id : SETLIST_KEY_BASE + '-anon'; }
 /* ── DB ── */
