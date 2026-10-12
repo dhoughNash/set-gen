@@ -1,4 +1,8 @@
 const Stripe = require('stripe');
+
+// client_reference_id comes from the checkout link, so it is untrusted. It must be a real
+// UUID before it is used in a database URL.
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 
 // Only Set Gen's own prices count here ($3.99/mo and $29.99/yr).
@@ -43,7 +47,7 @@ exports.handler = async function (event) {
       const session = stripeEvent.data.object;
       const userId = session.client_reference_id;
       const customerId = session.customer;
-      if (!userId) break;
+      if (!userId || !UUID_RE.test(userId)) break;
       const items = await stripe.checkout.sessions.listLineItems(session.id, { limit: 10 });
       if (!items.data.some(i => SET_GEN_PRICES.has(i.price?.id))) break;
       await patchSubscription(`user_id=eq.${userId}`, {
@@ -60,14 +64,14 @@ exports.handler = async function (event) {
       if (['active', 'trialing'].includes(sub.status)) status = 'active';
       else if (['past_due', 'unpaid'].includes(sub.status)) status = 'past_due';
       else if (['canceled', 'incomplete_expired'].includes(sub.status)) status = 'cancelled';
-      await patchSubscription(`stripe_customer_id=eq.${sub.customer}`, { status });
+      await patchSubscription(`stripe_customer_id=eq.${encodeURIComponent(sub.customer)}`, { status });
       break;
     }
 
     case 'customer.subscription.deleted': {
       const sub = stripeEvent.data.object;
       if (!isSetGenSub(sub)) break;
-      await patchSubscription(`stripe_customer_id=eq.${sub.customer}`, { status: 'cancelled' });
+      await patchSubscription(`stripe_customer_id=eq.${encodeURIComponent(sub.customer)}`, { status: 'cancelled' });
       break;
     }
 
