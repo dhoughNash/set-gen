@@ -227,8 +227,8 @@ body.locked .app-footer,body.pending .app-footer{display:none}
 </div>
 <div class="pending-gate" id="pendingGate">
   <div class="pending-box">
-    <h1>Almost <span>There</span></h1>
-    <p>Your account is created, but it's waiting on approval from Blue Amsterdam Studio before you can get in. Check back soon, or reach out if you were expecting quicker access.</p>
+    <h1>Hold <span>Up</span></h1>
+    <p>Your account is set up, but access to Set Gen isn't active right now. Try again, or reach out to Blue Amsterdam Studio if this keeps happening.</p>
     <div class="btn-row">
       <button type="button" class="btn ghost" id="btnCheckApproval">Check Again</button>
       <button type="button" class="btn ghost" id="btnPendingLogout">Log Out</button>
@@ -552,13 +552,18 @@ $('authPassword').addEventListener('keydown', e => { if (e.key === 'Enter') $('a
 let resolvedUserId = null;
 async function onLogin(user) {
   currentUser = user;
-  let { data: profile, error } = await db.from('profiles').select('approved').eq('id', user.id).maybeSingle();
-  if (!error && !profile) {
-    // First login to Set Gen: create a pending profile row (you approve it in the table).
-    const ins = await db.from('profiles').insert({ id: user.id, email: user.email, approved: false });
-    if (!ins.error) profile = { approved: false };
+  // Shared platform gate: one app_access row per user per app (same as the other apps).
+  const pub = db.schema('public');
+  let { data: hasAccess, error } = await pub.rpc('check_app_access', { p_app: 'setgen' });
+  if (!error && !hasAccess) {
+    // Self-serve: first login to Set Gen grants access, then re-check.
+    const joined = await pub.rpc('join_app', { p_app: 'setgen' });
+    if (!joined.error) {
+      const again = await pub.rpc('check_app_access', { p_app: 'setgen' });
+      hasAccess = again.data; error = again.error;
+    } else { error = joined.error; }
   }
-  if (error || !profile || !profile.approved) {
+  if (error || !hasAccess) {
     resolvedUserId = null;
     document.body.classList.remove('locked');
     document.body.classList.add('pending');
