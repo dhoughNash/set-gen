@@ -541,7 +541,7 @@ $('authSubmit').addEventListener('click', async () => {
       const { error } = await db.auth.signInWithPassword({ email, password });
       if (error) throw error;
     } else {
-      const { error } = await db.auth.signUp({ email, password });
+      const { error } = await db.auth.signUp({ email, password, options: { emailRedirectTo: window.location.origin + '/' } });
       if (error) throw error;
       $('authError').style.color = 'var(--ink)';
       $('authError').textContent = 'Account created — check your email if confirmation is required, otherwise you\'re in.';
