@@ -210,7 +210,7 @@ body.locked .app-footer,body.pending .app-footer{display:none}
 <div class="auth-gate" id="authGate">
   <div class="auth-box">
     <h1><img class="logo-img auth-logo" src="/logo.png" alt="Set Gen"></h1>
-    <div class="auth-tagline">Song catalog &amp; set list builder</div>
+    <div class="auth-tagline">Blue Amsterdam Studio &bull; Nashville, Tenn.</div>
     <form id="authForm" onsubmit="return false;">
       <label for="authEmail">Email</label>
       <input type="text" id="authEmail" autocomplete="email" placeholder="you@example.com">
@@ -227,8 +227,8 @@ body.locked .app-footer,body.pending .app-footer{display:none}
 </div>
 <div class="pending-gate" id="pendingGate">
   <div class="pending-box">
-    <h1>Hold <span>Up</span></h1>
-    <p>Your account is set up, but access to Set Gen isn't active right now. Try again, or email masterbusmdm@gmail.com if this keeps happening.</p>
+    <h1>Almost <span>There</span></h1>
+    <p>Your account is created, but it's waiting on approval from Blue Amsterdam Studio before you can get in. Check back soon, or reach out if you were expecting quicker access.</p>
     <div class="btn-row">
       <button type="button" class="btn ghost" id="btnCheckApproval">Check Again</button>
       <button type="button" class="btn ghost" id="btnPendingLogout">Log Out</button>
@@ -238,7 +238,7 @@ body.locked .app-footer,body.pending .app-footer{display:none}
 </div>
 <header>
   <h1><img class="logo-img" src="/logo.png" alt="Set Gen"></h1>
-  <div class="tagline">Song catalog &amp; set list builder<span class="header-account" id="headerAccount"></span> <button type="button" class="btn ghost btn-help" id="btnHelp">Help</button></div>
+  <div class="tagline">Blue Amsterdam Studio &bull; Nashville, Tenn.<span class="header-account" id="headerAccount"></span> <button type="button" class="btn ghost btn-help" id="btnHelp">Help</button></div>
 </header>
 <main>
   <section class="col-left">
@@ -367,7 +367,6 @@ body.locked .app-footer,body.pending .app-footer{display:none}
         <div><label for="gShow">Show / Venue</label><input type="text" id="gShow" placeholder="The Bluebird Cafe"></div>
         <div><label for="gDate">Date</label><input type="text" id="gDate" placeholder="July 4, 2026"></div>
       </div>
-      <div style="margin-top:10px"><label for="gArtist">Artist / Band Name (optional)</label><input type="text" id="gArtist" autocomplete="off" placeholder="Shown under the date on your set list"></div>
       <div class="btn-row">
        <button class="btn red" id="btnGenerate">Generate Set List</button>
         <button class="btn gold" id="btnPerfectSet">&#11088; The Perfect Set</button>
@@ -515,7 +514,6 @@ const $ = id => document.getElementById(id);
 let songs = [], setlist = [], savedSetlists = [], editingId = null, currentUser = null;
 let subStatus = 'free';
 async function init() {
-  $('gArtist').value = localStorage.getItem(artistKey()) || '';
   const savedPitch = localStorage.getItem(pitchKey());
   const oldHalfDown = localStorage.getItem('setgen-halfdown-' + (currentUser ? currentUser.id : 'anon'));
   $('gPitch').value = savedPitch !== null ? savedPitch : (oldHalfDown === '1' ? '-1' : '0');
@@ -543,7 +541,7 @@ $('authSubmit').addEventListener('click', async () => {
       const { error } = await db.auth.signInWithPassword({ email, password });
       if (error) throw error;
     } else {
-      const { error } = await db.auth.signUp({ email, password, options: { emailRedirectTo: window.location.origin + '/' } });
+      const { error } = await db.auth.signUp({ email, password });
       if (error) throw error;
       $('authError').style.color = 'var(--ink)';
       $('authError').textContent = 'Account created — check your email if confirmation is required, otherwise you\'re in.';
@@ -554,18 +552,13 @@ $('authPassword').addEventListener('keydown', e => { if (e.key === 'Enter') $('a
 let resolvedUserId = null;
 async function onLogin(user) {
   currentUser = user;
-  // Shared platform gate: one app_access row per user per app (same as the other apps).
-  const pub = db.schema('public');
-  let { data: hasAccess, error } = await pub.rpc('check_app_access', { p_app: 'setgen' });
-  if (!error && !hasAccess) {
-    // Self-serve: first login to Set Gen grants access, then re-check.
-    const joined = await pub.rpc('join_app', { p_app: 'setgen' });
-    if (!joined.error) {
-      const again = await pub.rpc('check_app_access', { p_app: 'setgen' });
-      hasAccess = again.data; error = again.error;
-    } else { error = joined.error; }
+  let { data: profile, error } = await db.from('profiles').select('approved').eq('id', user.id).maybeSingle();
+  if (!error && !profile) {
+    // First login to Set Gen: create a pending profile row (you approve it in the table).
+    const ins = await db.from('profiles').insert({ id: user.id, email: user.email, approved: false });
+    if (!ins.error) profile = { approved: false };
   }
-  if (error || !hasAccess) {
+  if (error || !profile || !profile.approved) {
     resolvedUserId = null;
     document.body.classList.remove('locked');
     document.body.classList.add('pending');
@@ -584,7 +577,7 @@ function onLogout() {
   subStatus = 'free';
   document.body.classList.remove('pending');
   document.body.classList.add('locked');
-  $('authEmail').value = ''; $('authPassword').value = ''; $('gArtist').value = '';
+  $('authEmail').value = ''; $('authPassword').value = '';
 }
 $('btnCheckApproval').addEventListener('click', async () => {
   if (currentUser) onLogin(currentUser);
@@ -609,6 +602,7 @@ db.auth.onAuthStateChange((event, session) => {
 // Yearly:  https://buy.stripe.com/test_4gMdRbeAg8v50BL0MD9R600
 const STRIPE_PAYMENT_LINK_MONTHLY = 'https://buy.stripe.com/4gMdRbeAg8v50BL0MD9R600'; // $3.99/mo (LIVE — real charges)
 const STRIPE_PAYMENT_LINK_YEARLY  = 'https://buy.stripe.com/9B65kF4ZG12Ddox0MD9R601';  // $29.99/yr (LIVE — real charges)
+const STRIPE_PORTAL_LINK = 'https://billing.stripe.com/p/login/4gMdRbeAg8v50BL0MD9R600';
 const FREE_SAVED_SET_LIMIT = 1;
 
 async function loadSubscriptionStatus() {
@@ -624,7 +618,7 @@ async function loadSubscriptionStatus() {
 
 function renderHeaderAccount() {
   const proBadge = subStatus === 'active'
-    ? '<span class="pro-badge">PRO</span> '
+    ? '<span class="pro-badge">PRO</span> <a href="' + STRIPE_PORTAL_LINK + '" target="_blank" rel="noopener">Manage Subscription</a> &bull; '
     : '<a class="upgrade-link" id="btnUpgrade">Upgrade to Pro</a> &bull; ';
   $('headerAccount').innerHTML = proBadge + esc(currentUser.email) + ' &bull; <a id="btnLogout">Log Out</a>';
   $('btnLogout').addEventListener('click', async () => { await db.auth.signOut(); });
@@ -648,7 +642,6 @@ const status = msg => $('genStatus').textContent = msg;
 const NOTE_NAMES = ['C','C&#9839;','D','E&#9837;','E','F','F&#9839;','G','A&#9837;','A','B&#9837;','B'];
 const SHAPE_ROOTS = { A:9, C:0, D:2, E:4, G:7 };
 const OPEN_ROOTS  = { 'Open B':11, 'Open D':2, 'Open E':4, 'Open G':7 };
-function artistKey() { return 'setgen-artist-' + (currentUser ? currentUser.id : 'anon'); }
 function pitchKey() { return 'setgen-pitch-' + (currentUser ? currentUser.id : 'anon'); }
 function pitchOffset() { return parseInt($('gPitch').value, 10) || 0; }
 function keyDisplayHTML(s) {
@@ -945,8 +938,7 @@ function renderSetlist() {
   const items=setlist.map(x=>songById(x.songId)).filter(Boolean);
   if (!items.length) { $('slSub').textContent='Hit Generate to build a set'; $('slTune').style.display='none'; rows.innerHTML=''; $('slTotal').style.display='none'; return; }
   const date=$('gDate').value.trim();
-  const artist=$('gArtist').value.trim();
-  $('slSub').textContent=[date,artist].filter(Boolean).join(' • ');
+  $('slSub').textContent=(date?date+' • ':'')+'Mason Douglas';
   const tuneLabel=$('gPitch').selectedOptions[0].textContent;
   $('slTune').textContent='Guitar: '+tuneLabel;
   $('slTune').className='sub tune'+(pitchOffset()!==0?' alt':'');
@@ -1003,8 +995,7 @@ function swapRow(i){
   setlist[i]={songId:pool[Math.floor(Math.random()*Math.min(3,pool.length))].id,locked:false};
   saveSetlist(setlist);renderSetlist();
 }
-['gTarget','gIntros','gShow','gDate','gArtist'].forEach(id=>$(id).addEventListener('input',renderSetlist));
-$('gArtist').addEventListener('input',()=>{ if(currentUser) localStorage.setItem(artistKey(), $('gArtist').value); });
+['gTarget','gIntros','gShow','gDate'].forEach(id=>$(id).addEventListener('input',renderSetlist));
 /* ── SAVE / LOAD SETS ── */
 $('btnSaveSet').addEventListener('click', async () => {
   if (!setlist.filter(x=>songById(x.songId)).length) { status('Generate a set first.'); return; }
@@ -1061,8 +1052,7 @@ $('btnWord').addEventListener('click',()=>{
   }
   const items=setlist.map(x=>songById(x.songId)).filter(Boolean);
   if(!items.length){status('Generate a set first.');return;}
-  const show=esc($('gShow').value.trim()||'Set List'), date=esc($('gDate').value.trim()), artist=esc($('gArtist').value.trim().toUpperCase());
-  const byline=[date,artist].filter(Boolean).join(' &bull; ');
+  const show=esc($('gShow').value.trim()||'Set List'), date=esc($('gDate').value.trim());
   let num=0;
   const rows=setlist.map(x=>{
     if (x.break) return '<tr><td colspan="2" style="padding:14pt 0 10pt;text-align:center;font-size:11pt;letter-spacing:2pt;color:#8A7A55;font-family:Arial,sans-serif;font-weight:bold;border-top:2pt solid #000;border-bottom:2pt solid #000;">'+esc(x.label||'SET BREAK')+'</td></tr>';
@@ -1072,7 +1062,7 @@ $('btnWord').addEventListener('click',()=>{
   }).join('');
   const html='<!DOCTYPE html><html><head><meta charset="utf-8"><title>'+show+'</title></head><body style="font-family:Arial Black,Arial,sans-serif;">' +
     '<div style="text-align:center;border-bottom:3pt solid #000;padding-bottom:10pt;margin-bottom:6pt;"><span style="font-size:28pt;font-weight:bold;text-transform:uppercase;">'+show+'</span><br>' +
-    (byline?'<span style="font-size:11pt;letter-spacing:2pt;color:#555;">'+byline+'</span><br>':'') +
+    '<span style="font-size:11pt;letter-spacing:2pt;color:#555;">'+(date?date+' &bull; ':'')+'MASON DOUGLAS</span><br>' +
     '<span style="font-size:10pt;letter-spacing:2pt;color:'+(pitchOffset()!==0?'#A8231B':'#555')+';font-weight:bold;">GUITAR: '+$('gPitch').selectedOptions[0].textContent.toUpperCase()+'</span></div>' +
     '<table style="width:100%;border-collapse:collapse;">'+rows+'</table></body></html>';
   const blob=new Blob(['﻿'+html],{type:'application/msword'});
