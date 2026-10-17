@@ -39,16 +39,17 @@ footer{text-align:center;padding:26px;font-family:'Oswald',sans-serif;text-trans
 <ul>
   <li><strong>Account information.</strong> Your email address and password when you sign up. Passwords are handled by our authentication provider and stored in hashed form; we cannot see them.</li>
   <li><strong>Your content.</strong> Songs you add (title, tempo, original/cover, length, intro length, mood, voicing, capo, tuning, staple status) and set lists you save (name, show or venue, date, and song order).</li>
-  <li><strong>Account status.</strong> A record of whether your account has been approved for access.</li>
+  <li><strong>Account access.</strong> A record that your account has access to Set Gen on our shared sign-in platform.</li>
+  <li><strong>Subscription information.</strong> Whether you are on the free plan or Pro, and an identifier that links your account to Stripe, our payment processor.</li>
   <li><strong>On-device data.</strong> Your current working set list and your guitar-tuning preference are stored in your browser's local storage. The App also caches its own pages on your device through a service worker so it can load faster and work offline.</li>
 </ul>
-<p>We do not collect payment information, precise location, contacts, or advertising identifiers. The App does not use advertising or analytics trackers.</p>
+<p>We do not collect or store your payment card details. If you buy Pro, you enter them directly with Stripe. We do not collect precise location, contacts, or advertising identifiers, and the App does not use advertising or analytics trackers.</p>
 
 <h2>How We Use Information</h2>
 <ul>
   <li>To create and secure your account and keep you signed in.</li>
   <li>To store your songs and set lists so they are available across your devices.</li>
-  <li>To review and approve new accounts.</li>
+  <li>To process and manage Pro subscriptions and enforce plan limits.</li>
   <li>To operate, maintain, and troubleshoot the App, and to contact you about your account or the App.</li>
 </ul>
 <p>We do not sell your personal information, and we do not use your songs or set lists for advertising.</p>
@@ -60,6 +61,7 @@ footer{text-align:center;padding:26px;font-family:'Oswald',sans-serif;text-trans
 <p>We rely on third parties to run the App. They process data only to provide their services:</p>
 <ul>
   <li><strong>Supabase</strong> — authentication and database storage of your account, songs, and set lists.</li>
+  <li><strong>Stripe</strong> — processes Pro subscription payments, collects your payment details, and tells us whether your subscription is active. Your email address is passed to Stripe at checkout.</li>
   <li><strong>Netlify</strong> — hosting and delivery of the App, which may log standard request data such as IP address and browser type.</li>
   <li><strong>Google Fonts</strong> and <strong>jsDelivr</strong> — deliver fonts and code libraries to your browser, which may receive your IP address when loading them.</li>
 </ul>
