@@ -513,7 +513,8 @@ function saveSetlist(s) { localStorage.setItem(setlistKey(), JSON.stringify(s));
 const $ = id => document.getElementById(id);
 /* ── STATE ── */
 let songs = [], setlist = [], savedSetlists = [], editingId = null, currentUser = null;
-let subStatus = 'free';
+let subStatus = 'free', unlimited = false, gensUsed = 0;
+const isPro = () => subStatus === 'active' || unlimited;
 async function init() {
   $('gArtist').value = localStorage.getItem(artistKey()) || '';
   const savedPitch = localStorage.getItem(pitchKey());
@@ -581,7 +582,7 @@ async function onLogin(user) {
 function onLogout() {
   currentUser = null;
   resolvedUserId = null;
-  subStatus = 'free';
+  subStatus = 'free'; unlimited = false; gensUsed = 0;
   document.body.classList.remove('pending');
   document.body.classList.add('locked');
   $('authEmail').value = ''; $('authPassword').value = ''; $('gArtist').value = '';
@@ -610,26 +611,49 @@ db.auth.onAuthStateChange((event, session) => {
 const STRIPE_PAYMENT_LINK_MONTHLY = 'https://buy.stripe.com/4gMdRbeAg8v50BL0MD9R600'; // $3.99/mo (LIVE — real charges)
 const STRIPE_PAYMENT_LINK_YEARLY  = 'https://buy.stripe.com/9B65kF4ZG12Ddox0MD9R601';  // $29.99/yr (LIVE — real charges)
 const STRIPE_PORTAL_LINK = 'https://billing.stripe.com/p/login/4gMdRbeAg8v50BL0MD9R600';
-const FREE_SAVED_SET_LIMIT = 1;
+// Free plan: 10 songs, 5 set generations (lifetime), no saved sets, no print/Word.
+// These are also enforced in Supabase (setgen schema) — the checks here just give friendly prompts.
+const FREE_SONG_LIMIT = 10;
+const FREE_GENERATION_LIMIT = 5;
 
 async function loadSubscriptionStatus() {
-  const { data, error } = await db.from('subscriptions').select('status').eq('user_id', currentUser.id).maybeSingle();
+  const { data, error } = await db.from('subscriptions').select('status, unlimited, generations_used').eq('user_id', currentUser.id).maybeSingle();
   if (!data && !error) {
     // First login since subscriptions existed — create their free-tier row.
     await db.from('subscriptions').insert({ user_id: currentUser.id, status: 'free' });
-    subStatus = 'free';
+    subStatus = 'free'; unlimited = false; gensUsed = 0;
   } else {
     subStatus = data ? data.status : 'free';
+    unlimited = data ? !!data.unlimited : false;
+    gensUsed = data ? (data.generations_used || 0) : 0;
   }
 }
 
 function renderHeaderAccount() {
-  const proBadge = subStatus === 'active'
-    ? '<span class="pro-badge">PRO</span> <a href="' + STRIPE_PORTAL_LINK + '" target="_blank" rel="noopener">Manage Subscription</a> &bull; '
-    : '<a class="upgrade-link" id="btnUpgrade">Upgrade to Pro</a> &bull; ';
+  let proBadge = '';
+  if (subStatus === 'active') {
+    proBadge = '<span class="pro-badge">PRO</span> <a href="' + STRIPE_PORTAL_LINK + '" target="_blank" rel="noopener">Manage Subscription</a> &bull; ';
+  } else if (!unlimited) {
+    const left = Math.max(0, FREE_GENERATION_LIMIT - gensUsed);
+    proBadge = left + ' of ' + FREE_GENERATION_LIMIT + ' free sets left &bull; <a class="upgrade-link" id="btnUpgrade">Upgrade to Pro</a> &bull; ';
+  }
   $('headerAccount').innerHTML = proBadge + esc(currentUser.email) + ' &bull; <a id="btnLogout">Log Out</a>';
   $('btnLogout').addEventListener('click', async () => { await db.auth.signOut(); });
-  if (subStatus !== 'active') $('btnUpgrade').addEventListener('click', () => goToCheckout());
+  if ($('btnUpgrade')) $('btnUpgrade').addEventListener('click', () => goToCheckout());
+}
+
+// Counts one generation against the free plan (server-side). Returns true if the set may be built.
+async function consumeGeneration() {
+  const { data, error } = await db.rpc('use_generation');
+  if (error || !data) { status('Could not check your plan — please try again.'); return false; }
+  if (!data.allowed) {
+    gensUsed = data.used || FREE_GENERATION_LIMIT;
+    renderHeaderAccount();
+    if (confirm('You’ve used your ' + FREE_GENERATION_LIMIT + ' free sets. Upgrade to Pro ($3.99/mo or $29.99/yr) for unlimited sets?')) goToCheckout();
+    return false;
+  }
+  if (data.used !== null && data.used !== undefined) { gensUsed = data.used; renderHeaderAccount(); }
+  return true;
 }
 
 function goToCheckout(link = STRIPE_PAYMENT_LINK_MONTHLY) {
@@ -692,6 +716,10 @@ $('btnSave').addEventListener('click', async () => {
   if (!title) { $('fTitle').focus(); return; }
   const len = (parseInt($('fMin').value)||0)*60 + (parseInt($('fSec').value)||0);
   if (len <= 0) { $('fMin').focus(); return; }
+  if (!editingId && !isPro() && songs.length >= FREE_SONG_LIMIT) {
+    if (confirm('Free plan is limited to ' + FREE_SONG_LIMIT + ' songs. Upgrade to Pro ($3.99/mo or $29.99/yr) for unlimited songs?')) goToCheckout();
+    return;
+  }
   const song = {
     id: editingId || ('s' + Date.now() + Math.floor(Math.random()*999)),
     title, tempo: segGet('fTempo')||'up', type: segGet('fType')||'original',
@@ -702,7 +730,11 @@ $('btnSave').addEventListener('click', async () => {
     await upsertSong(song);
     songs = editingId ? songs.map(s => s.id === editingId ? song : s) : [...songs, song];
     resetForm(); renderSongs(); renderMoodFilter(); renderSetlist();
-  } catch(e) { status('Error saving: ' + e.message); }
+  } catch(e) {
+    if (String(e.message).includes('FREE_SONG_LIMIT')) {
+      if (confirm('Free plan is limited to ' + FREE_SONG_LIMIT + ' songs. Upgrade to Pro ($3.99/mo or $29.99/yr) for unlimited songs?')) goToCheckout();
+    } else { status('Error saving: ' + e.message); }
+  }
 });
 $('btnCancel').addEventListener('click', resetForm);
 function resetForm() {
@@ -734,7 +766,7 @@ async function deleteSong(id) {
   } catch(e) { status('Error deleting: ' + e.message); }
 }
 function renderSongs() {
-  $('songCount').textContent = songs.length ? songs.length + ' songs' : '';
+  $('songCount').textContent = !isPro() ? songs.length + ' of ' + FREE_SONG_LIMIT + ' songs' : (songs.length ? songs.length + ' songs' : '');
   const el = $('songList');
   if (!songs.length) { el.innerHTML='<div class="empty-note">No songs yet.</div>'; return; }
   el.innerHTML = songs.slice().sort((a,b)=>a.title.localeCompare(b.title)).map(s =>
@@ -756,7 +788,7 @@ function renderMoodFilter() {
 }
 /* ── GENERATOR ── */
 function shuffle(a) { for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; }
-$('btnGenerate').addEventListener('click', () => {
+$('btnGenerate').addEventListener('click', async () => {
   const target = (parseInt($('gTarget').value)||45)*60;
   const ci = $('gIntros').checked;
   const mood = $('gMood').value;
@@ -809,6 +841,7 @@ $('btnGenerate').addEventListener('click', () => {
     if (bestDiff<=45) break;
   }
   if (!best) { status('Could not build a set — try loosening the rules.'); return; }
+  if (!(await consumeGeneration())) return;
   setlist = best.list.map(s=>({songId:s.id, locked: locked.some(x=>x.songId===s.id)}));
   saveSetlist(setlist); renderSetlist();
   const oc=best.list.filter(s=>s.type==='original').length, cc=best.list.filter(s=>s.type==='cover').length;
@@ -909,7 +942,7 @@ function splitCount(total, parts) {
   return Array.from({length:parts},(_,i)=>base+(i<rem?1:0));
 }
 
-$('btnPerfectSet').addEventListener('click', () => {
+$('btnPerfectSet').addEventListener('click', async () => {
   const targetTotalSec=(parseInt($('gTarget').value)||45)*60;
   const ci=$('gIntros').checked;
   const mood=$('gMood').value;
@@ -933,6 +966,7 @@ $('btnPerfectSet').addEventListener('click', () => {
   }
   if (!result.some(x=>x.songId)) { status('Could not build a Perfect Set — not enough songs match your filters.'); return; }
 
+  if (!(await consumeGeneration())) return;
   setlist=result; saveSetlist(setlist); renderSetlist();
   const setLabel = chunkCount>1 ? chunkCount+' sets, ' : '';
   status('\u2b50 Perfect Set built: '+setLabel+fmt(totalRun)+' against a '+fmt(targetTotalSec)+' target, following Tom Jackson\u2019s flow.'+(shortfall?' (Catalog ran short for at least one set.)':''));
@@ -1009,8 +1043,8 @@ $('gArtist').addEventListener('input',()=>{ if(currentUser) localStorage.setItem
 /* ── SAVE / LOAD SETS ── */
 $('btnSaveSet').addEventListener('click', async () => {
   if (!setlist.filter(x=>songById(x.songId)).length) { status('Generate a set first.'); return; }
-  if (subStatus !== 'active' && savedSetlists.length >= FREE_SAVED_SET_LIMIT) {
-    if (confirm('Free plan is limited to ' + FREE_SAVED_SET_LIMIT + ' saved set. Upgrade to Pro ($3.99/mo or $29.99/yr) for unlimited saved sets?')) goToCheckout();
+  if (!isPro()) {
+    if (confirm('Saving sets is a Pro feature ($3.99/mo or $29.99/yr). Upgrade now?')) goToCheckout();
     return;
   }
   const name=prompt('Name this set list:');
@@ -1049,14 +1083,14 @@ async function deleteSavedSet(id) {
 }
 /* ── EXPORT ── */
 $('btnPrint').addEventListener('click',()=>{
-  if (subStatus !== 'active') {
+  if (!isPro()) {
     if (confirm('Print/export is a Pro feature ($3.99/mo or $29.99/yr). Upgrade now?')) goToCheckout();
     return;
   }
   window.print();
 });
 $('btnWord').addEventListener('click',()=>{
-  if (subStatus !== 'active') {
+  if (!isPro()) {
     if (confirm('Word export is a Pro feature ($3.99/mo or $29.99/yr). Upgrade now?')) goToCheckout();
     return;
   }
