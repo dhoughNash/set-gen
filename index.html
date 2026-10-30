@@ -125,20 +125,43 @@ input:focus,select:focus{outline:3px solid var(--red);outline-offset:-1px}
 }
 @media(prefers-reduced-motion:reduce){*{transition:none!important}}
 /* AUTH GATE */
-.auth-gate{position:fixed;inset:0;background:var(--paper);z-index:9999;align-items:center;justify-content:center;padding:20px;display:none;}
+.auth-gate{position:fixed;inset:0;background:var(--paper);z-index:9999;align-items:center;justify-content:center;padding:20px;display:none;overflow-y:auto;}
 body.locked .auth-gate{display:flex}
 body.locked header,body.locked main{display:none}
-.auth-box{max-width:380px;width:100%;border:3px solid var(--ink);background:#FBF4E2;box-shadow:8px 8px 0 var(--ink);padding:34px 30px;}
+.auth-box{max-width:380px;width:100%;border:3px solid var(--ink);background:#FBF4E2;box-shadow:8px 8px 0 var(--ink);padding:34px 30px;margin:auto;}
+@media(max-width:380px){.auth-box{padding:28px 20px}}
 .auth-box h1{font-family:'Alfa Slab One',serif;font-size:28px;text-transform:uppercase;text-align:center;line-height:1;}
 .auth-box h1 span{color:var(--red)}
 .auth-tagline{text-align:center;font-family:'Oswald',sans-serif;text-transform:uppercase;letter-spacing:3px;font-size:11px;color:var(--khaki);margin:6px 0 24px;}
 .auth-error{color:var(--red);font-size:12px;margin-top:10px;font-family:'Oswald',sans-serif;text-transform:uppercase;letter-spacing:.5px;min-height:14px}
-.auth-toggle{text-align:center;margin-top:18px;font-size:13px;}
-.auth-toggle a{color:var(--red);cursor:pointer;text-decoration:underline;}
 .header-account{font-family:'Oswald',sans-serif;text-transform:uppercase;letter-spacing:1px;font-size:11px;color:var(--khaki);margin-left:14px;}
 .header-account a{color:var(--red);cursor:pointer;text-decoration:underline;}
 .pro-badge{font-family:'Oswald',sans-serif;text-transform:uppercase;letter-spacing:1px;font-size:10px;color:var(--red);border:1px solid var(--red);padding:1px 6px;}
 .upgrade-link{color:var(--red);cursor:pointer;text-decoration:underline;font-weight:600;}
+
+/* NEW HERE (sign-up prompt) */
+.new-here{margin-top:18px;padding-top:16px;border-top:2px solid var(--ink);text-align:center;}
+.nh-title{font-family:'Oswald',sans-serif;font-weight:600;font-size:22px;line-height:1.1;text-transform:uppercase;color:#E4572E;text-align:center;margin-bottom:6px;}
+.nh-text{font-size:14px;line-height:1.5;color:var(--ink);text-align:center;margin-bottom:12px;}
+.nh-btn{display:block;width:100%;height:50px;padding:0 10px;background:#E4572E;color:#fff;border:2px solid var(--ink);border-radius:0;font-family:'Oswald',sans-serif;font-size:14px;font-weight:600;text-transform:uppercase;letter-spacing:1px;white-space:nowrap;cursor:pointer;}
+.nh-btn:hover{background:var(--ink);color:var(--paper)}
+.nh-btn:focus-visible{outline:3px solid var(--red);outline-offset:2px}
+.nh-btn.alt{background:transparent;color:var(--ink);border-color:var(--ink)}
+.nh-btn.alt:hover{background:var(--ink);color:var(--paper)}
+.nh-btn:disabled{opacity:.55;cursor:not-allowed}
+.nh-btn:disabled:hover{background:#E4572E;color:#fff}
+.nh-btn.alt:disabled:hover{background:transparent;color:var(--ink)}
+
+/* CHECK YOUR INBOX */
+.check-inbox{display:none;text-align:center;}
+.check-inbox.show{display:block}
+.ci-title{font-family:'Alfa Slab One',serif;font-size:22px;line-height:1.1;text-transform:uppercase;margin-bottom:12px;}
+.check-inbox p{font-size:14px;line-height:1.5;margin-bottom:10px;}
+.check-inbox p strong{word-break:break-all}
+.ci-status{font-family:'Oswald',sans-serif;text-transform:uppercase;letter-spacing:.5px;font-size:12px;color:var(--khaki);min-height:16px;margin:4px 0 10px;}
+.ci-status.err{color:var(--red)}
+.check-inbox .nh-btn+.nh-btn{margin-top:10px}
+
 /* PENDING APPROVAL */
 .pending-gate{position:fixed;inset:0;background:var(--paper);z-index:9998;align-items:center;justify-content:center;padding:20px;display:none;}
 body.pending .pending-gate{display:flex}
@@ -210,7 +233,7 @@ body.locked .app-footer,body.pending .app-footer{display:none}
 <div class="auth-gate" id="authGate">
   <div class="auth-box">
     <h1><img class="logo-img auth-logo" src="/logo.png" alt="Set Gen"></h1>
-    <div class="auth-tagline">Song catalog &amp; set list builder</div>
+    <div class="auth-tagline" id="authTagline">Song catalog &amp; set list builder</div>
     <form id="authForm" onsubmit="return false;">
       <label for="authEmail">Email</label>
       <input type="text" id="authEmail" autocomplete="email" placeholder="you@example.com">
@@ -221,7 +244,19 @@ body.locked .app-footer,body.pending .app-footer{display:none}
         <button type="button" class="btn red" id="authSubmit" style="flex:1">Log In</button>
       </div>
     </form>
-    <div class="auth-toggle" id="authToggle">Need an account? <a onclick="setAuthMode('signup')">Sign up</a></div>
+    <div class="new-here" id="newHere">
+      <div class="nh-title" id="nhTitle">New here?</div>
+      <p class="nh-text" id="nhText">Create a free account to get started.</p>
+      <button type="button" class="nh-btn" id="nhBtn">Create Free Account</button>
+    </div>
+    <div class="check-inbox" id="checkInbox">
+      <div class="ci-title">Check your inbox</div>
+      <p>We sent a confirmation link to <strong id="ciEmail"></strong>.</p>
+      <p>Tap the link, then come back here and sign in. If it doesn't arrive, check your spam or junk folder.</p>
+      <div class="ci-status" id="ciStatus"></div>
+      <button type="button" class="nh-btn" id="ciBack">Back to Sign In</button>
+      <button type="button" class="nh-btn alt" id="ciResend">Resend email</button>
+    </div>
     <div class="legal-note">By signing up or logging in you agree to our <a href="/terms.html">Terms of Service</a> &bull; <a href="/privacy.html">Privacy Policy</a>.</div>
   </div>
 </div>
@@ -526,30 +561,116 @@ async function init() {
   renderSongs(); renderMoodFilter(); renderSetlist(); renderSavedSetlists();
 }
 /* ── AUTH ── */
-let authMode = 'signin';
+let authMode = 'signin', authBusy = false;
+let pendingEmail = '', resendTimer = null, resending = false;
+const TAGLINE_DEFAULT = 'Song catalog & set list builder';
+
+function authLabel() { return authMode === 'signup' ? 'Sign Up' : 'Log In'; }
+function setAuthError(msg) { $('authError').style.color = 'var(--red)'; $('authError').textContent = msg || ''; }
+
+function showAuthForm() {
+  $('checkInbox').classList.remove('show');
+  $('authForm').style.display = '';
+  $('newHere').style.display = '';
+}
+
 function setAuthMode(mode) {
   authMode = mode;
-  $('authSubmit').textContent = mode === 'signin' ? 'Log In' : 'Sign Up';
-  $('authToggle').innerHTML = mode === 'signin'
-    ? 'Need an account? <a onclick="setAuthMode(\'signup\')">Sign up</a>'
-    : 'Already have an account? <a onclick="setAuthMode(\'signin\')">Log in</a>';
-  $('authError').textContent = '';
+  const su = mode === 'signup';
+  $('authTagline').textContent = su ? 'Create your account' : TAGLINE_DEFAULT;
+  $('authSubmit').textContent = authLabel();
+  $('authPassword').setAttribute('autocomplete', su ? 'new-password' : 'current-password');
+  $('nhTitle').textContent = su ? 'Already have an account?' : 'New here?';
+  $('nhText').textContent  = su ? 'Sign in with your email and password.' : 'Create a free account to get started.';
+  $('nhBtn').textContent   = su ? 'Back to Sign In' : 'Create Free Account';
+  $('nhBtn').classList.toggle('alt', su);
+  setAuthError('');
+  showAuthForm();
 }
+
+$('nhBtn').addEventListener('click', () => setAuthMode(authMode === 'signin' ? 'signup' : 'signin'));
+
+function startResendLock() {
+  clearInterval(resendTimer);
+  const b = $('ciResend');
+  let left = 30;
+  b.disabled = true;
+  b.textContent = 'Resend email (' + left + ')';
+  resendTimer = setInterval(() => {
+    left--;
+    if (left <= 0) { clearInterval(resendTimer); b.disabled = false; b.textContent = 'Resend email'; }
+    else b.textContent = 'Resend email (' + left + ')';
+  }, 1000);
+}
+
+function showCheckInbox(email) {
+  pendingEmail = email;
+  $('ciEmail').textContent = email;
+  $('ciStatus').textContent = ''; $('ciStatus').classList.remove('err');
+  $('authForm').style.display = 'none';
+  $('newHere').style.display = 'none';
+  $('checkInbox').classList.add('show');
+  startResendLock();
+}
+
+$('ciBack').addEventListener('click', () => {
+  setAuthMode('signin');
+  $('authEmail').value = pendingEmail;
+  $('authPassword').value = '';
+  $('authPassword').focus();
+});
+
+$('ciResend').addEventListener('click', async () => {
+  if (resending || $('ciResend').disabled || !pendingEmail) return;
+  resending = true;
+  $('ciResend').disabled = true;
+  const st = $('ciStatus');
+  st.classList.remove('err'); st.textContent = 'Sending\u2026';
+  try {
+    const { error } = await db.auth.resend({ type: 'signup', email: pendingEmail, options: { emailRedirectTo: window.location.origin + '/' } });
+    if (error) throw error;
+    st.textContent = 'Sent again. Check your inbox.';
+  } catch (e) {
+    st.classList.add('err'); st.textContent = e.message;
+  } finally {
+    resending = false;
+    startResendLock();
+  }
+});
+
 $('authSubmit').addEventListener('click', async () => {
+  if (authBusy) return;
   const email = $('authEmail').value.trim(), password = $('authPassword').value;
-  if (!email || !password) { $('authError').textContent = 'Enter an email and password.'; return; }
-  $('authError').textContent = '';
+  if (!email || !password) { setAuthError('Enter an email and password.'); return; }
+  setAuthError('');
+  authBusy = true;
+  $('authSubmit').disabled = true;
+  $('authSubmit').textContent = 'Please wait\u2026';
   try {
     if (authMode === 'signin') {
       const { error } = await db.auth.signInWithPassword({ email, password });
       if (error) throw error;
     } else {
-      const { error } = await db.auth.signUp({ email, password, options: { emailRedirectTo: window.location.origin + '/' } });
+      const { data, error } = await db.auth.signUp({ email, password, options: { emailRedirectTo: window.location.origin + '/' } });
       if (error) throw error;
-      $('authError').style.color = 'var(--ink)';
-      $('authError').textContent = 'Account created — check your email if confirmation is required, otherwise you\'re in.';
+      const u = data && data.user;
+      if (u && Array.isArray(u.identities) && u.identities.length === 0) {
+        // Email already registered
+        setAuthMode('signin');
+        $('authEmail').value = email;
+        setAuthError('That email already has an account. Try signing in instead.');
+      } else if (!data.session) {
+        showCheckInbox(email);
+      }
+      // If a session came back, onAuthStateChange logs them in.
     }
-  } catch (e) { $('authError').style.color = 'var(--red)'; $('authError').textContent = e.message; }
+  } catch (e) {
+    setAuthError(e.message);
+  } finally {
+    authBusy = false;
+    $('authSubmit').disabled = false;
+    $('authSubmit').textContent = authLabel();
+  }
 });
 $('authPassword').addEventListener('keydown', e => { if (e.key === 'Enter') $('authSubmit').click(); });
 let resolvedUserId = null;
@@ -1110,7 +1231,7 @@ $('btnWord').addEventListener('click',()=>{
     (byline?'<span style="font-size:11pt;letter-spacing:2pt;color:#555;">'+byline+'</span><br>':'') +
     '<span style="font-size:10pt;letter-spacing:2pt;color:'+(pitchOffset()!==0?'#A8231B':'#555')+';font-weight:bold;">GUITAR: '+$('gPitch').selectedOptions[0].textContent.toUpperCase()+'</span></div>' +
     '<table style="width:100%;border-collapse:collapse;">'+rows+'</table></body></html>';
-  const blob=new Blob(['﻿'+html],{type:'application/msword'});
+  const blob=new Blob(['\ufeff'+html],{type:'application/msword'});
   const a=document.createElement('a');
   a.href=URL.createObjectURL(blob); a.download=(show.replace(/[^a-z0-9]+/gi,'-')||'set-list')+'.doc'; a.click();
 URL.revokeObjectURL(a.href);
