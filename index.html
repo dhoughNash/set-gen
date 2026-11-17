@@ -178,6 +178,16 @@ body.pending header,body.pending main{display:none}
 .auth-logo{height:170px;width:170px;margin:-14px auto 0}
 /* LEGAL LINKS */
 .legal-note{text-align:center;margin-top:14px;font-size:12px;color:var(--khaki)}
+.terms-check{display:none;text-align:left;font-size:12px;line-height:1.5;color:var(--ink);margin-top:14px;cursor:pointer}
+.terms-check input{width:auto;margin:2px 8px 0 0;float:left;transform:scale(1.15);accent-color:var(--red)}
+.terms-check span{display:block;overflow:hidden}
+.terms-check a{color:var(--red)}
+.terms-gate,.sub-gate{position:fixed;inset:0;background:rgba(246,238,221,.97);z-index:9999;align-items:center;justify-content:center;padding:20px;display:none}
+.terms-gate.show,.sub-gate.show{display:flex}
+.gate-box{max-width:420px;width:100%;border:3px solid var(--ink);background:#FBF4E2;box-shadow:8px 8px 0 var(--ink);padding:30px 28px}
+.gate-box h1{font-family:'Alfa Slab One',serif;font-size:22px;text-transform:uppercase;line-height:1.05;margin-bottom:14px}
+.gate-box p{font-size:14px;margin:0 0 14px}
+.gate-box a{color:var(--red)}
 .legal-note a{color:var(--red);text-decoration:underline}
 .app-footer{border-top:2px solid var(--ink);padding:18px 20px;text-align:center;font-family:'Oswald',sans-serif;text-transform:uppercase;letter-spacing:2px;font-size:11px;color:var(--khaki);background:var(--paper)}
 .app-footer a{color:var(--red);text-decoration:underline}
@@ -239,6 +249,7 @@ body.locked .app-footer,body.pending .app-footer{display:none}
       <input type="text" id="authEmail" autocomplete="email" placeholder="you@example.com">
       <label for="authPassword">Password</label>
       <input type="password" id="authPassword" autocomplete="current-password" placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;">
+      <label class="terms-check" id="authTermsWrap"><input type="checkbox" id="authTermsCheck"><span id="authTermsText">I have read and agree to the <a href="/terms.html" target="_blank" rel="noopener">Terms of Service</a> and <a href="/privacy.html" target="_blank" rel="noopener">Privacy Policy</a>.</span></label>
       <div class="auth-error" id="authError"></div>
       <div class="btn-row" style="margin-top:16px">
         <button type="button" class="btn red" id="authSubmit" style="flex:1">Log In</button>
@@ -257,7 +268,30 @@ body.locked .app-footer,body.pending .app-footer{display:none}
       <button type="button" class="nh-btn" id="ciBack">Back to Sign In</button>
       <button type="button" class="nh-btn alt" id="ciResend">Resend email</button>
     </div>
-    <div class="legal-note">By signing up or logging in you agree to our <a href="/terms.html">Terms of Service</a> &bull; <a href="/privacy.html">Privacy Policy</a>.</div>
+    <div class="legal-note" id="authLegalNote">By logging in you agree to our <a href="/terms.html">Terms of Service</a> &bull; <a href="/privacy.html">Privacy Policy</a>.</div>
+  </div>
+</div>
+<div class="terms-gate" id="termsGate">
+  <div class="gate-box">
+    <h1 id="tgTitle">We updated our <span style="color:var(--red)">Terms</span></h1>
+    <p id="tgSub">Please review and accept the Terms of Service and Privacy Policy to keep using Set Gen.</p>
+    <div class="auth-error" id="tgError"></div>
+    <label class="terms-check" id="tgCheckWrap" style="display:block;margin-top:0"><input type="checkbox" id="tgCheck"><span>I have read and agree to the <a href="/terms.html" target="_blank" rel="noopener">Terms of Service</a> and <a href="/privacy.html" target="_blank" rel="noopener">Privacy Policy</a>.</span></label>
+    <div class="btn-row" style="margin-top:18px;justify-content:center">
+      <button type="button" class="btn red" id="tgBtn" disabled>Accept &amp; Continue</button>
+      <button type="button" class="btn ghost" id="tgLogout">Log Out</button>
+    </div>
+  </div>
+</div>
+<div class="sub-gate" id="subGate">
+  <div class="gate-box">
+    <h1>Before you <span style="color:var(--red)">subscribe</span></h1>
+    <p id="sgText"></p>
+    <p style="font-size:12px;color:var(--khaki)">Payments are handled by Stripe. See our <a href="/terms.html" target="_blank" rel="noopener">Terms of Service</a>.</p>
+    <div class="btn-row" style="margin-top:6px;justify-content:center">
+      <button type="button" class="btn red" id="sgGo">Continue to Checkout</button>
+      <button type="button" class="btn ghost" id="sgCancel">Cancel</button>
+    </div>
   </div>
 </div>
 <div class="pending-gate" id="pendingGate">
@@ -584,6 +618,8 @@ function setAuthMode(mode) {
   $('nhText').textContent  = su ? 'Sign in with your email and password.' : 'Create a free account to get started.';
   $('nhBtn').textContent   = su ? 'Back to Sign In' : 'Create Free Account';
   $('nhBtn').classList.toggle('alt', su);
+  $('authTermsWrap').style.display = su ? 'block' : 'none';
+  $('authLegalNote').style.display = su ? 'none' : '';
   setAuthError('');
   showAuthForm();
 }
@@ -642,6 +678,7 @@ $('authSubmit').addEventListener('click', async () => {
   if (authBusy) return;
   const email = $('authEmail').value.trim(), password = $('authPassword').value;
   if (!email || !password) { setAuthError('Enter an email and password.'); return; }
+  if (authMode === 'signup' && !$('authTermsCheck').checked) { setAuthError('Please check the box to agree to the Terms of Service and Privacy Policy.'); return; }
   setAuthError('');
   authBusy = true;
   $('authSubmit').disabled = true;
@@ -651,7 +688,7 @@ $('authSubmit').addEventListener('click', async () => {
       const { error } = await db.auth.signInWithPassword({ email, password });
       if (error) throw error;
     } else {
-      const { data, error } = await db.auth.signUp({ email, password, options: { emailRedirectTo: window.location.origin + '/' } });
+      const { data, error } = await db.auth.signUp({ email, password, options: { emailRedirectTo: window.location.origin + '/', data: { setgen_terms_version: TERMS_VERSION, setgen_terms_accepted_at: new Date().toISOString(), setgen_terms_text: $('authTermsText').textContent.trim() } } });
       if (error) throw error;
       const u = data && data.user;
       if (u && Array.isArray(u.identities) && u.identities.length === 0) {
@@ -673,6 +710,24 @@ $('authSubmit').addEventListener('click', async () => {
   }
 });
 $('authPassword').addEventListener('keydown', e => { if (e.key === 'Enter') $('authSubmit').click(); });
+// Bump this when terms.html or privacy.html change in a way users must re-accept.
+const TERMS_VERSION = '2026-11-17';
+function checkTerms(user) {
+  const md = (user && user.user_metadata) || {};
+  if (md.setgen_terms_version === TERMS_VERSION) { $('termsGate').classList.remove('show'); return; }
+  $('tgCheck').checked = false; $('tgBtn').disabled = true; $('tgError').textContent = '';
+  $('termsGate').classList.add('show');
+}
+$('tgCheck').addEventListener('change', () => { $('tgBtn').disabled = !$('tgCheck').checked; });
+$('tgLogout').addEventListener('click', async () => { $('termsGate').classList.remove('show'); await db.auth.signOut(); });
+$('tgBtn').addEventListener('click', async () => {
+  if (!$('tgCheck').checked) return;
+  $('tgBtn').disabled = true; $('tgBtn').textContent = 'Saving\u2026'; $('tgError').textContent = '';
+  const { error } = await db.auth.updateUser({ data: { setgen_terms_version: TERMS_VERSION, setgen_terms_accepted_at: new Date().toISOString(), setgen_terms_text: $('tgCheck').nextElementSibling.textContent.trim() } });
+  $('tgBtn').textContent = 'Accept & Continue';
+  if (error) { $('tgError').style.color = 'var(--red)'; $('tgError').textContent = 'Could not save your acceptance. Please try again.'; $('tgBtn').disabled = false; return; }
+  $('termsGate').classList.remove('show');
+});
 let resolvedUserId = null;
 async function onLogin(user) {
   currentUser = user;
@@ -694,6 +749,7 @@ async function onLogin(user) {
     return;
   }
   document.body.classList.remove('locked', 'pending');
+  checkTerms(user);
   if (resolvedUserId === user.id) return;
   resolvedUserId = user.id;
   await loadSubscriptionStatus();
@@ -778,6 +834,16 @@ async function consumeGeneration() {
 }
 
 function goToCheckout(link = STRIPE_PAYMENT_LINK_MONTHLY) {
+  // Show the renewal terms right before the buyer is sent to Stripe.
+  const yearly = (link === STRIPE_PAYMENT_LINK_YEARLY);
+  $('sgText').textContent = yearly
+    ? 'Pro is $29.99 per year, plus any sales tax. It renews automatically each year until you cancel. Cancel anytime from Manage Subscription in the header; cancellation takes effect at the end of the billing period.'
+    : 'Pro is $3.99 per month, plus any sales tax. It renews automatically each month until you cancel. Cancel anytime from Manage Subscription in the header; cancellation takes effect at the end of the billing period.';
+  $('sgGo').onclick = () => { $('subGate').classList.remove('show'); proceedToCheckout(link); };
+  $('sgCancel').onclick = () => { $('subGate').classList.remove('show'); };
+  $('subGate').classList.add('show');
+}
+function proceedToCheckout(link) {
   // client_reference_id is how the webhook matches the Stripe customer back
   // to this Supabase user — Managed Payments still honors this Payment Link param.
   const url = link +
